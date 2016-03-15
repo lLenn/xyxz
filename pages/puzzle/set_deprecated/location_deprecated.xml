@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<location name="set" xml:lang="en">
+	<dataprovider parent="puzzle" function_all="retrieve_sets" function_one="retrieve_set" primary_key="get_id" row_header="get_set_row_header" row_renderer="get_set_row_render" description="get_description_set"/>
+</location>

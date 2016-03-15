@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<location name="lesson_excercise" xml:lang="en">
+	<dataprovider parent="lesson" function_all="retrieve_lesson_excercises" function_one="retrieve_lesson_excercise" primary_key="get_id" row_header="get_lesson_excercise_row_header" row_renderer="get_lesson_excercise_row_render" description="get_description_lesson_excercise"/>
+</location>

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<location name="puzzle" xml:lang="en">
+	<dataprovider function_all="retrieve_all_puzzle_properties" function_one="retrieve_puzzle_properties_by_puzzle_id" primary_key="get_puzzle_id" row_header="get_puzzle_row_header" row_renderer="get_puzzle_row_render" description="get_description_puzzle"/>
+</location>
