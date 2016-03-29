@@ -47,8 +47,6 @@ $(function()
 				dataType: "json",
 				}).done(function(data)
 					{
-						$("#search_show_more_results").remove();
-						
 						if(append)
 							search_content.append(data.html);
 						else
@@ -62,14 +60,10 @@ $(function()
 						else
 							search_offices = data.offices;
 						
-						if($("#search_show_more_results").length)
-						{
-							$("#search_show_more_results").on("click", 
-									function(event)
-									{
-										search(value, false, true); 
-									});
-						}
+						if(data.show_more)
+							$("#search_show_more").css("display", "block");
+						else
+							$("#search_show_more").css("display", "none");
 
 						for(var i=0, len=search_offices.length; i<len; i++)
 						{
@@ -93,7 +87,6 @@ $(function()
 		office_element.on("mouseout", function(){ office_element.toggleClass("hover"); });
 		office_element.on("click", function()
 				{
-					console.log(encodeURI(map_default + office.street + " " + office.city));
 					map_iframe.attr("src", encodeURI(map_default + office.street + " " + office.city));
 				});
 	}
@@ -156,7 +149,7 @@ $(function()
 				{
 					suggestions_container.empty();
 				}
-			}, 300);
+			}, 150);
 	}
 	
 	function scrollSuggestions(scroll)
@@ -306,6 +299,8 @@ $(function()
 	}
 	
 	suggestions_container.css("width", search_input.outerWidth() + "px");
+	
+	$("#search_show_more_results").on("click", function(){ search(search_prev, false, true); });
 	
 	search_isOpenDuringWeekends.on("change", search);
 	search_hasSupportDesk.on("change", search);

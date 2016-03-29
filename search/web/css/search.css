@@ -22,6 +22,7 @@
 	width: 400px;
 	height: 400px;
 	float: right;
+	position: relative;
 }
 
 #map_iframe
@@ -63,8 +64,8 @@
 	border: 0;
 	background-color: #EAF2FF;
 	line-height: 1.7em;
-	height: 1.7em;
 	width: 100%;
+	height: 1.7em;
 	padding: 0;
 }
 
@@ -81,16 +82,16 @@
 
 #search_content
 {
-	position: relative;
-	bottom: 0;
 	overflow: auto;
-	height: 80%;
+	height: 75%;
 }
 
-.search_show_more
+#search_show_more
 {
 	width: 100%;
 	background-color: #81A0AD;
+	position: absolute;
+	bottom: 0;
 }
 
 #search_weekend_container
