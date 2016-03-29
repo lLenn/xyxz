@@ -34,7 +34,7 @@ class SearchController extends Controller
     {
     	$twig = array();
     	$json = array();
-    	$twig["showMore"] = false;
+    	$show_more = false;
     	
     	$search = $request->request->get('search');
     	$search_support = $request->request->get('search_has_support_desk') == 1?true:false;
@@ -50,13 +50,14 @@ class SearchController extends Controller
   		$cnt_offices = count($twig["offices"]);
   		if($cnt_offices > $limit)
   		{
-    		$twig["showMore"] = true;
+  			$show_more = true;
     		unset($twig["offices"][$cnt_offices-1]);
   		}
   			
     	$json["html"] = $this->renderView('search/results.html.twig', $twig);
     	$json["limit"] = $limit;
     	$json["offset"] = $offset;
+    	$json["show_more"] = $show_more;
     	
     	$json["offices"] = Array();
     	foreach($twig["offices"] as $office)
