@@ -1,0 +1,13 @@
+{# app/Resources/views/search/results.html.twig #}
+
+	
+	{% for office in offices %}
+		<div class="search_result">
+			<div class="search_result_label"> - Kantoor te {{ office.street }}, {{ office.city.cityName }}</div>
+		</div>
+	{% endfor %}
+{% if showMore %}
+	<div class="search_show_more">
+		<a href="javascript: void('show more results!');" id="search_show_more_results">Show more</a>
+	</div>
+{% endif %}

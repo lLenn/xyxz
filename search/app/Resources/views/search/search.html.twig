@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %} Search {% endblock %}
+
+{% block stylesheets %}
+	<link rel="icon" type="image/png" href="{{ asset('img/search.png') }}"></link>
+	<link rel="stylesheet" href="{{ asset('css/search.css') }}"></link>
+{% endblock %}
+
+{% block body %}
+
+	<div id="container">
+		
+		<div id="map_container">
+			<iframe id="map_iframe">
+			</iframe>
+		</div>
+		
+		<div id="search_container">
+			<form id="search_form" method="post" action="{{url('search:results')}}",">
+				<div id="search_header">
+					<div class="search_label">Toon kantoren in de buurt van:</div>
+					<div id="search_field">
+						<input type="text" id="search_input" name="search" value="{{ defaults._search }}" autocomplete="off"/>
+					</div>
+				</div>
+				<div id="suggestions_container"></div>
+				<div id="search_weekend_container" class="search_label"><input type="checkbox" id="search_is_open_during_weekends" name="search_is_open_during_weekends"/> Open tijdens weekends</div>
+				<div id="search_support_container" class="search_label"><input type="checkbox" id="search_has_support_desk" name="search_has_support_desk"/> Met helpdesk</div>
+				<br class="clearfloat"/>
+			</form>
+			
+			<div class="seperator"></div>
+			
+			<div id="search_content">
+			</div>
+		</div>
+		
+	</div>
+
+{% endblock %}
+
+{% block javascripts %}
+	<script> var search_suggestions_ajax =  {method: "post", url: "{{url('search:suggestions')}}"} </script>
+	<script src="{{ asset('js/search.js') }}"></script>
+{% endblock %}
