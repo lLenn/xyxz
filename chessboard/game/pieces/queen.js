@@ -106,3 +106,22 @@ chssQueen.prototype.addAvailableMoves = function(x, y, color, game, check)
 	}
 	return blockedCheck;
 }
+
+chssQueen.prototype.getMovePath = function(x1, y1, x2, y2)
+{
+	var dirY = (y2 - y1!=0)?(y2 - y1)/Math.abs(y2 - y1):0,
+		dirX = (x2 - x1!=0)?(x2 - x1)/Math.abs(x2 - x1):0,
+		path = [[x1, y1]],
+		x3 = x1,
+		y3 = y1;
+		
+	do
+	{
+		x3 = x3 + dirX;
+		y3 = y3 + dirY;
+		path.push([x3, y3])
+	}
+	while(x3 != x2 || y3 != y2);
+		
+	return path;
+}

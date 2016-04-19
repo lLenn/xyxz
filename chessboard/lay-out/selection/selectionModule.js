@@ -112,7 +112,7 @@ chssSelectionModule.prototype.sendSelectionSolution = function(validation)
 
 chssSelectionModule.prototype.solutionRegistered = function()
 {
-	console.log("Selection solution registered!");
+	//console.log("Selection solution registered!");
 }
 
 chssSelectionModule.prototype.draw = function(top)
@@ -120,7 +120,7 @@ chssSelectionModule.prototype.draw = function(top)
 	if(this._board.getFlip())
 		this._board.rotate()
 		
-	if(typeof this._info == 'undefined')
+	if(typeof this._info === 'undefined')
 	{
 		this.addSelectionInfo();
 		this.addActions();
@@ -163,10 +163,6 @@ chssSelectionModule.prototype.initialDraw = function(top)
 	this.clear(true);
 	this._info.setText(this._question, this._description);
 	
-	var marginHor = 13 * (chssOptions.moves_size/200),
-		marginVer = 5 * (chssOptions.board_size/360),
-		marginVer2 = 11 * (chssOptions.moves_size/200);
-	
 	this._board.getStatusImage().getImageElement().style.top = this._top + "px";
 	this._board.getStatusImage().getImageElement().style.width = chssOptions.moves_size + "px";
 	this._board.getStatusImage().getImageElement().style.left = parseFloat(this._board.getBackground().style.width) + "px";
@@ -188,7 +184,7 @@ chssSelectionModule.prototype.initialDraw = function(top)
 	this._info.getWrapper().style.width = chssOptions.moves_size + "px";
 	this._info.getWrapper().style.top = this._top + "px";
 	this._info.getWrapper().style.left = this._board.getBackground().offsetWidth + "px";
-	this._info.setHeight(this._board.getWrapper().offsetHeight - this._buttonWrapper.offsetHeight - this._top);
+	this._info.setHeight(chssCommentArea.SMALL, this._board.getWrapper().offsetHeight - this._buttonWrapper.offsetHeight - this._top);
 	this._info.draw();
 }
 
@@ -206,7 +202,7 @@ chssSelectionModule.prototype.resize = function(diffCoeff)
 	this._info.getWrapper().style.top = parseFloat(this._info.getWrapper().style.top) * diffCoeff + "px";
 	this._info.getWrapper().style.left = this._board.getBackground().offsetWidth + "px";
 	this._info.resize(diffCoeff);
-	this._info.setHeight(this._board.getWrapper().offsetHeight - this._buttonWrapper.offsetHeight - this._top);
+	this._info.setHeight(chssCommentArea.SMALL, this._board.getWrapper().offsetHeight - this._buttonWrapper.offsetHeight - this._top);
 	this._info.draw();
 }
 
@@ -267,13 +263,13 @@ chssSelectionModule.prototype.showResult = function(result)
 	this._board.getStatusImage().getImageElement().style.top = this._top + "px"
 	
 	this._info.getWrapper().style.top = this._board.getStatusImage().getImageElement().offsetHeight + this._top + "px";
-	this._info.setHeight(this._board.getWrapper().offsetHeight - this._buttonWrapper.offsetHeight - this._board.getStatusImage().getImageElement().offsetHeight - this._top);
+	this._info.setHeight(chssCommentArea.SMALL, this._board.getWrapper().offsetHeight - this._buttonWrapper.offsetHeight - this._board.getStatusImage().getImageElement().offsetHeight - this._top);
 	this._info.draw(false);
 }
 
 chssSelectionModule.prototype.clear = function(complete)
 {
-	if(typeof complete == 'undefined')
+	if(typeof complete === 'undefined')
 		complete = false;
 	for(var i=0; i<8; i++)
 	{

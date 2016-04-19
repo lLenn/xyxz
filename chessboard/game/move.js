@@ -24,6 +24,8 @@ function chssMove(x1, y1, x2, y2)
 	this._enpassent = "-";
 	this._castle = null;
 	this._promotion = false;
+	this._removedPieces = new Array();
+	this._evaluation = null;
 	
 	this._boardChanges = new Array();
 }
@@ -256,6 +258,52 @@ chssMove.prototype.setPromotion = function(promotion)
 	this._promotion = promotion;
 }
 
+chssMove.prototype.getRemovedPieces = function()
+{
+	return this._removedPieces;
+}
+
+chssMove.prototype.setRemovedPieces = function(removedPieces)
+{
+	this._removedPieces = removedPieces;
+}
+
+chssMove.prototype.addRemovedPiece = function(piece)
+{
+	if(this._removedPieces.length != 0)
+	{
+		for(var i=0, len=this._removedPieces.length; i<len; i++)
+		{
+			var score = chssPiece.comparePieceScore(piece, this._removedPieces[i].piece);
+			if(score != 0 && score != -1)
+			{
+				this._removedPieces = chssHelper.array_addAt(this._removedPieces, i, {piece: piece, length: 1});
+				break;
+			}
+			else if(score == 0)
+			{
+				this._removedPieces[i].length++;
+				break;
+			}
+		}
+		
+		if(i==len)
+			this._removedPieces.push({piece: piece, length: 1});
+	}
+	else
+		this._removedPieces.push({piece: piece, length: 1});
+}
+
+chssMove.prototype.getEvaluation = function()
+{
+	return this._evaluation;
+}
+
+chssMove.prototype.setEvaluation = function(evaluation)
+{
+	this._evaluation = evaluation;
+}
+
 chssMove.prototype.getBoardChanges = function()
 {
 	return this._boardChanges;
@@ -287,3 +335,41 @@ chssMove.prototype.isNull = function()
 {
 	return isNaN(this._x1) || isNaN(this._y1) || isNaN(this._x2) || isNaN(this._y2);
 }
+
+chssMove.prototype.getMovePath = function()
+{
+	return this._board[this._y2][this._x2].getMovePath(this._x1, this._y1, this._x2, this._y2);
+}
+
+/*
+Create chssPiece Objects for removedPieces
+chssMove.prototype.setRemovedPiecesFromBoard = function()
+{
+	var removedPieces = ["BK", "BQ", "BR", "BR", "BB", "BB", "BN", "BN",
+	                     "B_", "B_", "B_", "B_", "B_", "B_", "B_", "B_",
+	                     "WK", "WQ", "WR", "WR", "WB", "WB", "WN", "WN",
+	                     "W_", "W_", "W_", "W_", "W_", "W_", "W_", "W_"];
+	
+	for(var i=0; i<8; i++)
+	{
+		for(var j=0; j<8; j++)
+		{
+			if(this._board[i][j] != null)
+			{
+				var piececode = this._board[i][j].getColor().toUpperCase() + this._board[i][j].getPiececode().toUpperCase();
+
+				for(var k=0, len=removedPieces.length; k<len; k++)
+				{
+					if(removedPieces[k] == piececode)
+					{
+						removedPieces = chssHelper.array_removeAt(removedPieces, k);
+						break;
+					}
+				}
+			}
+		}
+	}
+	
+	this._removedPieces = removedPieces;
+}
+*/

@@ -80,3 +80,9 @@ chssPawn.prototype.addAvailableMoves = function(x, y, color, game, check)
 	}
 	return blockedCheck;
 }
+
+chssPawn.prototype.getMovePath = function(x1, y1, x2, y2)
+{
+	var diffY = y2 - y1;
+	return (Math.abs(diffY)==2)?[[x1, y1], [x1, y1+1*(diffY/2)], [x2, y2]]:[[x1, y1], [x2, y2]];
+}

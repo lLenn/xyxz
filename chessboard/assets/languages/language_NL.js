@@ -285,7 +285,7 @@ chssLanguage.languageTranslations = {
 1319: 'Ontwikkelingsvoordeel',
 1320: 'Nieuwtje',
 1321: 'Met compensatie',
-1331: 'Toegevoegd door: %s',
+1331: 'Toegevoegd door %s',
 1332: 'Andere commentaren',
 1333: 'Makers commentaar',
 1334: 'Jouw commentaar',
@@ -303,4 +303,8 @@ chssLanguage.languageTranslations = {
 1407: 'Bord legen',
 1408: 'Verder',
 1409: 'Zodat de oefening goed doordringt, vragen we je ze nogmaals te overlopen.',
-1410: 'Om af te sluiten zijn hier nog enkele oefeningen waar je onlangs fouten op hebt gemaakt.'}
+1410: 'Om af te sluiten zijn hier nog enkele oefeningen waar je onlangs fouten op hebt gemaakt.',
+1411: 'Jouw rating',
+1425: 'Grotere weergave commentaar',
+1426: 'Kleinere weergave commentaar',
+1427: 'Andere'}

@@ -79,6 +79,11 @@
 	padding: 0.3em 0.85em; 
 }
 
+input.text
+{
+	background-color: #D0DF99;
+}
+
 /* radio */
 .validation
 {
@@ -89,18 +94,25 @@
 
 .correct
 {
-	color: green;
+	color: #479203;
 }
 
 .caution
 {
-	color: orange;
+	color: #FBA01A;
 }
-
 
 .wrong
 {
-	color: red;
+	color: #F71F06;
+}
+
+div.error
+{
+	color: #F71F06;
+	border-color: #F71F06;
+	border-style: solid;
+	background: #F1BAB4;
 }
 
 div.smallButton

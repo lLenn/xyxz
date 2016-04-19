@@ -57,8 +57,8 @@ chssTimer.prototype = {
 							clearInterval(parent._timerId);
 							if(parent._onFinished != null)
 								parent._onFinished[0].call(parent._onFinished[1]);
-							else
-								console.log("Timeout");
+							//else
+							//	console.log("Timeout");
 						}
 					}, 100);
 		},

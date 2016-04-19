@@ -78,5 +78,4 @@ chssEndGameInfo.prototype = {
 				this._textWrapper.style.width = parseFloat(this._wrapper.style.width) - (30 * (chssOptions.moves_size/200)) + "px";
 			}
 		}
-		
 }

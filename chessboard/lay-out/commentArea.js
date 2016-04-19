@@ -6,13 +6,12 @@ chssCommentArea.CREATORS_COMMENT = "3";
 chssCommentArea.OTHER_COMMENTS = "4";
 chssCommentArea.YOUR_COMMENT = "5";
 
+chssCommentArea.SMALL = "6";
+chssCommentArea.BIG = "7";
+
 function chssCommentArea()
 {
-	var paddingHor1 = 10 * (chssOptions.moves_size/200),
-		paddingHor2 = 20 * (chssOptions.moves_size/200),
-		paddingVer = 3 * (chssOptions.board_size/360),
-		paddingVer2 = 2 * (chssOptions.board_size/360),
-		fontSize = 16 * (chssOptions.board_size/360);
+	var	fontSize = 16 * (chssOptions.board_size/360);
 	
 	this._comment = undefined;
 	this._comments = undefined;
@@ -20,13 +19,17 @@ function chssCommentArea()
 	this._comment_write = undefined;
 	this._visible = false;
 	this._edit = false;
+	this._smallHeight = undefined;
+	this._bigHeight = undefined;
+	this._currentSize = chssCommentArea.SMALL;
+	this._currentView = chssCommentArea.CREATORS_COMMENT;
 	
 	this._wrapper = document.createElement("div");
+	this._wrapper.style.display = "relative";
 	this._wrapper.style.backgroundColor = chssOptions.background_color;
 	
 	this._subWrapper = document.createElement("div");
 	this._menu = document.createElement("div");
-	this._menu.style.padding = paddingVer + "px 0px";
 	this._creatorComment = new chssLinkButton();
 	this._creatorComment.setText(chssLanguage.translate(275));
 	this._creatorComment.getWrapper().style.float = "left";
@@ -34,7 +37,6 @@ function chssCommentArea()
 	this._otherComments = new chssLinkButton();
 	this._otherComments.setText(chssLanguage.translate(1332));
 	this._otherComments.getWrapper().style.float = "left";
-	
 	/*
 	this._yourComment = new chssLinkButton();
 	this._yourComment.setText(chssLanguage.translate(1334));
@@ -48,14 +50,11 @@ function chssCommentArea()
 	//this._menu.appendChild(this._yourComment.getWrapper());
 	
 	this._label = document.createElement("div");
-	this._label.style.margin = -paddingVer2 + "px " + paddingHor1 + "px " + paddingVer2*2 + "px";
-	this._label.style.padding = paddingVer + "px 0px";
 	this._label.innerHTML = chssLanguage.translate(352) + ":";
 
 	this._textWrapper = document.createElement("div");
 	this._textWrapper.style.overflowY = "auto";
 	this._textWrapper.style.float = "right";
-	this._textWrapper.style.margin = "0px " + paddingHor1 + "px " + "0px " + paddingHor2 + "px";
 	this._textArea = document.createElement("div");
 	this._textWrapper.appendChild(this._textArea);
 	
@@ -64,6 +63,16 @@ function chssCommentArea()
 	this._subWrapper.appendChild(this._textWrapper);
 	
 	this._wrapper.appendChild(this._subWrapper);
+	
+	this._changeView = document.createElement("div");
+	this._changeView.className = "smallButton unselectable";
+	this._changeView.style.position = "absolute";
+	this._changeView.style.display = "none";
+	this._changeView.style.top = "0px";
+	this._changeView.style.right = "0px";
+	this.addEvents();
+
+	this._wrapper.appendChild(this._changeView);
 }
 
 chssCommentArea.prototype = {
@@ -77,22 +86,71 @@ chssCommentArea.prototype = {
 			return this._visible;
 		},
 		
-		setHeight: function(height)
+		setHeight: function(height, small, big)
 		{
+			if(typeof small !== "undefined")
+				this._smallHeight = small;
+			if(typeof big !== "undefined")
+				this._bigHeight = big;
+			if(typeof height === "undefined")
+				this._currentSize = chssCommentArea.SMALL;
+			else
+				this._currentSize = height;
+
 			var isBreak = this._label.style.display != "none";
 			
-			this._wrapper.style.height = height + "px";
+			this._wrapper.style.height = (this._currentSize==chssCommentArea.BIG?this._bigHeight:this._smallHeight) + "px";
 			this._textWrapper.style.height = parseFloat(this._wrapper.style.height) - (isBreak?this._label.offsetHeight:this._menu.offsetHeight) - (6 * (chssOptions.board_size/360)) + "px";
+			
+			if(this._currentSize == chssCommentArea.SMALL)
+			{
+				this._changeView.innerHTML = "+";
+				this._changeView.title = chssLanguage.translate(1425);
+			}
+			else
+			{
+				this._changeView.innerHTML = "&ndash;";
+				this._changeView.title = chssLanguage.translate(1426);
+			}
 		},
 		
 		draw: function()
 		{
-			var fontSize = 16 * (chssOptions.board_size/360);
+			var paddingHor1 = 10 * (chssOptions.moves_size/200),
+				paddingHor2 = 20 * (chssOptions.moves_size/200),
+				paddingVer = 3 * (chssOptions.board_size/360),
+				paddingVer2 = 2 * (chssOptions.board_size/360),
+				fontSize = 16 * (chssOptions.board_size/360),
+				border = 1 * (chssOptions.board_size/360),
+				fontSize2 = 11 * (chssOptions.board_size/360),
+				extra = 4 * (chssOptions.board_size/360);
 			
 			this._creatorComment.setFontSize(fontSize + "px");
 			this._otherComments.setFontSize(fontSize + "px");
+
+			this._menu.style.padding = "0px 0px " + paddingVer + "px 0px";
+			
 			this._label.style.fontSize = fontSize + "px";
+			this._label.style.margin = -paddingVer2 + "px " + paddingHor1 + "px " + paddingVer2*2 + "px";
+			this._label.style.padding = paddingVer + "px 0px";
+			
 			this._textArea.style.fontSize = fontSize + "px";
+			this._textWrapper.style.margin = "0px " + paddingHor1 + "px " + "0px " + paddingHor2 + "px";
+			
+			this._changeView.style.border = border + "px solid " + chssOptions.select_color;
+			this._changeView.style.fontSize = fontSize2 + "px";
+			this._changeView.style.height = fontSize2 + extra + "px";
+			this._changeView.style.width = fontSize2 + extra + "px";
+		},
+		
+		resize: function(diffCoeff)
+		{
+			if(typeof this._smallHeight !== "undefined")
+				this._smallHeight = this._smallHeight * diffCoeff;
+			if(typeof this._bigHeight !== "undefined")
+				this._bigHeight = this._bigHeight * diffCoeff;
+			this.setHeight(this._currentSize);
+			this.draw();
 		},
 		
 		changeLayout: function()
@@ -101,7 +159,8 @@ chssCommentArea.prototype = {
 				user_id = 0,
 				isBreak = chssBoard.moduleManager.getVariableForCommentArea(chssCommentArea.IS_BREAK),
 				comment = chssBoard.moduleManager.getVariableForCommentArea(chssCommentArea.GET_COMMENT),
-				comments = this.getComments();
+				comments = this.getComments(),
+				max_width = parseFloat(this._wrapper.style.width) - (25 * (chssOptions.moves_size/200)) - 24;
 			
 			this._comment_write = "";
 			this._comments_string = "";
@@ -127,9 +186,9 @@ chssCommentArea.prototype = {
 				if((comment_temp.getUserId() == 0 || (comment_temp.getUserId() == user_id && this._edit)) && !isBreak)
 				{
 					if(comment_temp.getUserId() == 0)
-						comment = comment_temp.getComment();
+						comment = chssHelper.wordWrap(this._textArea, comment_temp.getComment(), max_width, false, false);
 					else if(comment_temp.getUserId() == user_id)
-						this._comment_write = comment_temp.getComment();
+						this._comment_write = chssHelper.wordWrap(this._textArea, comment_temp.getComment(), max_width, false, false);
 					comments_to_remove.push(i);
 				}
 				else if(!isBreak)
@@ -137,14 +196,16 @@ chssCommentArea.prototype = {
 					var name = comment_temp.getUsername();
 					if(comment_temp.getUserId() == -1)
 						name = chssLanguage.translate(1335);
-					this._comments_string += name + ":" + "<\br>" + comment_temp.getComment() + "<\br><\br>";
+					if(this._comments_string != "")
+						this._comments_string += "<br style='line-height: 0.5em;'/>";
+					this._comments_string += "<div>" + chssHelper.wordWrap(this._textArea, comment_temp.getComment(), max_width, false, false) + "</div>";
+					this._comments_string += "<div style='padding-left: 2em; font-size: 0.6em;'>" + chssLanguage.translate(1331).replace("%s", name) + "</div>";
 				}
 			}
 			for(var i=0;i<comments_to_remove.length;i++)
 				comments = chssHelper.array_removeAt(comments, comments_to_remove[i]-i);
-
+			
 			//var removed_yc = this._yourComment.getWrapper().style.display == "none";
-			var removed_oc = this._otherComments.getWrapper().style.display == "none";
 			/*
 			if((!this._edit || update_right) && !removed_yc)
 			{
@@ -155,33 +216,49 @@ chssCommentArea.prototype = {
 				this._yourComment.getWrapper().style.display != "block";
 			}
 			*/
-			if(comments.length == 0 && !removed_oc)
+			
+			if(comment == "")
+			{
+				this._creatorComment.getWrapper().style.display = "none";
+				this._otherComments.setText(chssLanguage.translate(1332));
+				this._currentView = chssCommentArea.OTHER_COMMENTS;
+			}
+			else
+			{
+				this._creatorComment.getWrapper().style.display = "block";
+				this._otherComments.setText(chssLanguage.translate(1427));
+			}
+
+			if(comments.length == 0)
 			{
 				this._otherComments.getWrapper().style.display = "none";
+				this._currentView = chssCommentArea.CREATORS_COMMENT;
 			}
-			else if(comments.length > 0 && removed_oc)
+			else if(comments.length > 0)
 			{
-				this._otherComments.getWrapper().style.display == "block";
+				this._otherComments.getWrapper().style.display = "block";
 			}
+			
+			var breakHeight = isBreak?this._label.offsetHeight:this._menu.offsetHeight;
 			
 			this._visible = !(this._edit == false && this._comments_string == "" && comment == "" || this._wrapper.style.display == "none");
 			this._subWrapper.style.display = this._visible?"block":"none";
-			this._textWrapper.style.height = parseFloat(this._wrapper.style.height) - (isBreak?this._label.offsetHeight:this._menu.offsetHeight) - (6 * (chssOptions.board_size/360)) + "px";
+			this._textWrapper.style.height = parseFloat(this._wrapper.style.height) - breakHeight - (6 * (chssOptions.board_size/360)) + "px";
 			
 			this._comment = comment;
 			this._comments = comments;
 
-			this.changeCommentArea(chssCommentArea.CREATORS_COMMENT)
+			this.changeCommentArea(this._currentView)
 		},
 		
-		changeCommentArea: function(element)
+		changeCommentArea: function(view)
 		{
 			var update_right = false,
-				html = "",
-				max_width = parseFloat(this._wrapper.style.width) - (25 * (chssOptions.moves_size/200)) - 24;
-
-			this.drawMenu(element);
-			switch(element)
+				html = "";
+			
+			this._currentView = view;
+			this.drawMenu();
+			switch(view)
 			{
 				case chssCommentArea.CREATORS_COMMENT:
 					this.switchCommentView(update_right);
@@ -197,16 +274,20 @@ chssCommentArea.prototype = {
 					break;
 			}
 
-			this._textArea.innerHTML = chssHelper.wordWrap(this._textArea, html, max_width, false, false);
+			this._textArea.innerHTML = html;
 			if(this._textWrapper.offsetHeight<this._textArea.offsetHeight)
 			{
 				this._textWrapper.style.marginRight = "0px";
 				this._textWrapper.style.width = parseFloat(this._wrapper.style.width) - (20 * (chssOptions.moves_size/200)) + "px";
+				if(typeof this._bigHeight !== "undefined")
+					this._changeView.style.display = "block";
 			}
 			else
 			{
 				this._textWrapper.style.marginRight = "24px";
 				this._textWrapper.style.width = parseFloat(this._wrapper.style.width) - (20 * (chssOptions.moves_size/200)) - 24 + "px";
+				if(this._currentSize != chssCommentArea.BIG)
+					this._changeView.style.display = "none";
 			}
 		},
 		
@@ -239,10 +320,10 @@ chssCommentArea.prototype = {
 			*/
 		},
 		
-		drawMenu: function(element)
+		drawMenu: function()
 		{
-			this._creatorComment.selected(element == chssCommentArea.CREATORS_COMMENT);
-			this._otherComments.selected(element == chssCommentArea.OTHER_COMMENTS);
+			this._creatorComment.selected(this._currentView == chssCommentArea.CREATORS_COMMENT);
+			this._otherComments.selected(this._currentView == chssCommentArea.OTHER_COMMENTS);
 		},
 		
 		getComments: function()
@@ -252,5 +333,37 @@ chssCommentArea.prototype = {
 			for(var i=0; i<currentComments.length; i++)
 				comments.push(new chssComment(currentComments[i].getUserId(), currentComments[i].getComment(), currentComments[i].getUsername()));
 			return comments;
+		},
+		
+		getSize: function()
+		{
+			return this._currentSize;
+		},
+		
+		addEvents: function()
+		{
+			var obj = this;
+			
+			this._creatorComment.getWrapper().onclick = function()
+			{
+				if(!obj._creatorComment.selected())
+					obj.changeCommentArea(chssCommentArea.CREATORS_COMMENT);
+			}
+			
+			this._otherComments.getWrapper().onclick = function()
+			{
+				if(!obj._otherComments.selected())
+					obj.changeCommentArea(chssCommentArea.OTHER_COMMENTS);
+			}
+
+			this._changeView.onclick = function()
+			{ 
+				var size = obj.getSize();
+				if(size == chssCommentArea.SMALL)
+					obj.setHeight(chssCommentArea.BIG);
+				else if(size == chssCommentArea.BIG)
+					obj.setHeight(chssCommentArea.SMALL);
+				obj.changeLayout(obj._currentView);
+			}
 		}
 }

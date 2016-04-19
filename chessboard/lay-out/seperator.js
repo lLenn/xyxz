@@ -15,7 +15,7 @@ chssSeperator.prototype = {
 		draw: function(width)
 		{
 			this._line.style.width =  width*0.6 + "px";
-			this._line.style.margin = 2*(chssOptions.board_size/360) + "px " + width*0.2 + "px";
+			this._line.style.margin = 7*(chssOptions.board_size/360) + "px " + width*0.2 + "px";
 		}
 }
 

@@ -263,6 +263,7 @@ movesElement.prototype.renderMovesList = function()
 			padding = 1 * (chssOptions.board_size/360),
 			added_height_style = 21 * (chssOptions.board_size/360),
 			added_width_style = 7 * (chssOptions.board_size/360),
+			added_width_style_2 = 10 * (chssOptions.board_size/360),
 			negative_width = 2 * (chssOptions.board_size/360),
 			scroll_diff = 25 *(chssOptions.board_size/360);
 		for(var i=0; i<this._movesDataprovider.length; i++)
@@ -296,8 +297,7 @@ movesElement.prototype.renderMovesList = function()
 				
 				if(rd.getVariationUserId() != 0)
 				{
-					/*
-					var name = rd.getVariationUserName();
+					var name = rd.getVariationUsername();
 					if(rd.variationUserId == -1)
 						name = chssLanguage.translate(1335);
 					else if(rd.variationUserId == user_id)
@@ -305,31 +305,28 @@ movesElement.prototype.renderMovesList = function()
 	
 					var spanElement = document.createElement("span");
 					spanElement.style.position = "absolute";
-					spanElement.style.paddingTop = "1px";
-					spanElement.style.paddingBottom = "1px";
-					spanElement.style.paddingLeft = "1px";
-					spanElement.style.paddingRight = "1px";
+					spanElement.style.padding = "0px " + padding + "px 0px " + padding + "px";
+					spanElement.style.fontSize =  16 * (chssOptions.board_size/360) + "px";
+					spanElement.style.cursor = "pointer";	
 					//spanElement.style.fontWeight = "bold";
 					spanElement.style.color = "#000000";
-					spanElementtoolTip = Language.getInstance().translate(1331).replace("%s", name);
-					spanElement.text = "*";
+					spanElement.title = chssLanguage.translate(1331).replace("%s", name);
+					spanElement.innerHTML = "*";
+
+					this._movesElement.appendChild(spanElement);
 					
-					this.moves.addChild(lbl);
+					width -= negative_width;
 					
-					var added_width:Number = 10;
-					width -= 2;
-					
-					if(added_width + width > this.moves.width - 35)
+					if(added_width_style_2 + width > this._movesElement.offsetWidth - scroll_diff)
 					{
 						width = 0;
-						height += 24;
+						height += added_height_style;
 					}
 					
-					spanElementx = width;
-					spanElementy = height;
+					spanElement.style.left = width + "px";
+					spanElement.style.top = height + "px";
 					
-					width += added_width;
-					*/
+					width += added_width_style_2;
 				}
 			}
 			
@@ -353,7 +350,7 @@ movesElement.prototype.renderMovesList = function()
 				var spanElement = document.createElement("span");
 				spanElement.style.position = "absolute";
 
-				spanElement.style.padding = "0px " + padding + "px 0px " + padding*5 + "px";
+				spanElement.style.padding = "0px " + padding*5 + "px 0px " + padding*5 + "px";
 				spanElement.style.fontSize =  16 * (chssOptions.board_size/360) + "px";
 				//spanElement.style.fontWeight = "bold";
 				spanElement.style.color = "#000000";

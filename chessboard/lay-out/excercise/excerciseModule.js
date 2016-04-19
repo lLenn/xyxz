@@ -6,6 +6,12 @@ function chssExcerciseModule(args, board, parent)
 	this._objectSerial = args.objectSerial;
 	this._attempt = args.attempt;
 	this._previousPage = String(args.previousPage).replace('%26','&');
+	this._noRepeat = args.noRepeat;
+	this._selectRandom = args.selectRandom;
+	this._puzzleAttempts = args.puzzleAttempts;
+	this._puzzleSeconds = args.puzzleSeconds;
+	if(args.logout)
+		chssBoard.ajaxRequest.setLogout(args.logout);
 	
 	this._title = undefined;
 	this._description = undefined;
@@ -40,7 +46,7 @@ chssExcerciseModule.prototype = {
 				this._object = object;
 			}
 			//chssBoard.ajaxRequest.loadData("POST", "ajax/retrieve_data.php", "location=puzzle&object_serial=" + this._objectSerial, this.initPuzzle, this);
-			chssBoard.ajaxRequest.loadData("POST", "ajax/retrieve_data.php", "location=excercise&object_serial=" + this._objectSerial, this.initExcercise, this);
+			chssBoard.ajaxRequest.loadData("POST", "ajax/retrieve_data.php", "location=excercise&object_serial=" + this._objectSerial + (this._selectRandom?"&select_random=1":""), this.initExcercise, this);
 		},
 		
 		initExcercise: function(data)
@@ -126,7 +132,6 @@ chssExcerciseModule.prototype = {
 		
 		resize: function(diffCoeff)
 		{
-			
 			this._buttonWrapper.style.left = this._board.getBackground().offsetWidth + "px";
 			
 			this._start.resize(this._board.getButtonWidth(), this._board.getButtonHeight());
@@ -200,7 +205,7 @@ chssExcerciseModule.prototype = {
 					
 					if(this._version == 3)
 						chssBoard.ajaxRequest.loadData("POST", "ajax/retrieve_data.php", "location=excercise&prev_mistakes=1&object_serial=" + this._objectSerial, this.initMistakesExcercise, this);	
-					else if(this._version == 4)
+					else if(this._version == 4 || this._noRepeat)
 						this._start.changeState(chssLanguage.translate(540), this.redirect, this);
 				}
 			}
@@ -226,7 +231,7 @@ chssExcerciseModule.prototype = {
 				this.rotateModule(nextModule)
 			}
 			var data = undefined;
-			if(typeof this._loadedExcercises[this._pointer] != 'undefined')
+			if(typeof this._loadedExcercises[this._pointer] !== 'undefined')
 			{
 				this._nextLoaded = true;
 				data = this._loadedExcercises[this._pointer];
@@ -256,7 +261,7 @@ chssExcerciseModule.prototype = {
 			{
 				switch(excercise.type)
 				{
-					case 1: module = new chssPuzzleModule({}, this._board, this._parent, true); break;
+					case 1: module = new chssPuzzleModule({attempts: this._puzzleAttempts, seconds: this._puzzleSeconds}, this._board, this._parent, true); break;
 					case 2: module = new chssMultipleAnswersModule({}, this._board, this._parent, true); break;
 					case 3: module = new chssSelectionModule({}, this._board, this._parent, true); break;
 				}

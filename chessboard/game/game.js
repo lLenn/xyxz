@@ -3,10 +3,15 @@ chssGame.results = {WHITE: "white",
 					DRAW: "draw",
 					NONE: "none"};
 
-function chssGame(fen)//default
+function chssGame(arg)//default
 {
-	this._pgnfile = new chssPGNFile();
-	this._pgnfile.setFen(fen);
+	if(arg instanceof chssPGNFile)
+		this._pgnfile = arg
+	else
+	{
+		this._pgnfile = new chssPGNFile();
+		this._pgnfile.setFen(arg);
+	}
 	
 	this._board = undefined;
 	this._castle = undefined;
@@ -303,8 +308,9 @@ chssGame.prototype.addMoveWithPromotion = function(move)
 chssGame.prototype.addMove = function(x1, y1, x2, y2, variation)
 {
 	//console.log("bij externe promotie, verplicht het promotiestuk te geven");
-	var move = new chssMove(x1,y1,x2,y2);
-	var validation = this._edit == true && this.checkMove(x1, y1, x2, y2);
+	var move = new chssMove(x1,y1,x2,y2),
+		validation = this._edit == true && this.checkMove(x1, y1, x2, y2),
+		capturedPiece = this._board[y2][x2];
 	if(validation)
 	{
 		var moveNot = chssPiece.convertMoveToPGN(move, this.active(), this._board, this._enpassent, this.getCurrentMove());
@@ -389,7 +395,9 @@ chssGame.prototype.addMove = function(x1, y1, x2, y2, variation)
 				}
 
 				this.addAvailableMoves();
+				this.addRemovedPieces(move, capturedPiece);
 				move.setBoard(this.copyBoard(null));
+				//move.setRemovedPiecesFromBoard();
 				move.setFen(this.newFenFromCurrentBoard(false, true, false, true));
 				move.setEnpassent(this._enpassent);
 				move.setCastle([this._castle[0], this._castle[1], this._castle[2], this._castle[3]]);
@@ -438,7 +446,7 @@ chssGame.prototype.addMove = function(x1, y1, x2, y2, variation)
 
 chssGame.prototype.checkDraw = function(move)
 {
-	if(typeof move == 'undefined')
+	if(typeof move === 'undefined')
 		move = this.getMovesList(this.getCurrentMove());
 	
 	if(move.getFenClock() == 3 || move.getHalfmoveClock() == 50)
@@ -507,6 +515,15 @@ chssGame.prototype.addAvailableMoves = function()
 			}
 		}
 	}
+}
+
+chssGame.prototype.addRemovedPieces = function(move, capturedPiece)
+{
+	var prev_move = this.getMove(this.getCurrentMove()-2);
+	if(prev_move != null && prev_move.getNotation() != "...")
+		move.setRemovedPieces(prev_move.getRemovedPieces());
+	if(capturedPiece != null)
+		move.addRemovedPiece(capturedPiece);
 }
 
 chssGame.prototype.addLastMove = function(x1, y1, x2, y2)
@@ -770,7 +787,7 @@ chssGame.prototype.getVariationList = function(variationId) //default: NaN
 
 chssGame.prototype.getCurrentMove = function(skipVariation) //default = false
 {
-	if(typeof skipVariation == 'undefined' || skipVariation == null)
+	if(typeof skipVariation === 'undefined' || skipVariation == null)
 		skipVariation = false;
 	
 	var currentmove = this._currentmove;
@@ -877,11 +894,17 @@ chssGame.prototype.copyPiece = function(piece)
 	return null;
 }
 
-chssGame.prototype.getMove = function(movenumber)
+chssGame.prototype.getMove = function(movenumber, variationid)
 {
+	if(typeof movenumber === 'undefined')
+		movenumber = this.getCurrentMove() - 1;
+
+	if(typeof variationid === 'undefined')
+		variationid = this._variationid;
+	
 	try
 	{
-		var movesList = this.getMovesList();
+		var movesList = this.getMovesList(variationid);
 		return movesList[movenumber];
 	}
 	catch(e)
@@ -891,15 +914,18 @@ chssGame.prototype.getMove = function(movenumber)
 	return null;
 }
 
-chssGame.prototype.getMovesList = function()
+chssGame.prototype.getMovesList = function(variationid)
 {
+	if(typeof variationid === 'undefined')
+		variationid = this._variationid;
+	
 	var variationList = null;
 	var index = this._pgnfile.getMoves().length;
 	var movesList = new Array();
 	var variationMoves = new Array();
-	if(this._variationmove != 0 && !isNaN(this._variationid) && this._variationid != 0)
+	if(!isNaN(variationid) && variationid != 0)
 	{
-		variationList = this.getVariationList(NaN);
+		variationList = this.getVariationList(variationid);
 		var parentVariationId = variationList.getParentVariationId();
 		var halfmove = variationList.getHalfmove();
 		variationMoves = this.sliceVariationMovesArray(variationList.getMoves(), -1);
@@ -1167,7 +1193,7 @@ chssGame.prototype.changeBreak = function(add, question) //default: question=""
 
 chssGame.prototype.changeNAG = function(add, code) 
 {
-	if(typeof code == 'undefined')
+	if(typeof code === 'undefined')
 		code = "";
 	
 	var move = this.getMove(this.getCurrentMove()-1);

@@ -54,7 +54,7 @@ chssMultipleAnswersInfo.prototype = {
 			{
 				txt += chssLanguage.translate(this._themes[i]);
 				if(i+1!=this._themes.length)
-					txt += "</br>";
+					txt += "<br/>";
 			}
 			
 			if(txt != "")
@@ -68,7 +68,7 @@ chssMultipleAnswersInfo.prototype = {
 				this._themesElement.getWrapper().style.display = "none";
 			}
 			
-			if(typeof this._height == 'undefined' || !chssHelper.isNumeric(this._height) || this._height<=0)
+			if(typeof this._height === 'undefined' || !chssHelper.isNumeric(this._height) || this._height<=0)
 				this._height = this._wrapper.offsetHeight;
 			
 			var textHeight = this._height - this._label.offsetHeight - this._themesElement.getWrapper().offsetHeight - 

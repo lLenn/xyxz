@@ -48,7 +48,7 @@ chssSelectionInfo.prototype = {
 			this._textArea.innerHTML = "";
 			var max_width = parseFloat(this._wrapper.offsetWidth) - (25 * (chssOptions.moves_size/200)) - 24;
 			
-			if(typeof question == 'undefined')
+			if(typeof question === 'undefined')
 				question = true;
 
 			if(question)

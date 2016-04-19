@@ -4,9 +4,9 @@ function chssGameModule(args, board, parent)
 	this._board = board;
 
 	this._objectSerial = args.objectSerial;
-	this._endGame = true;
-	this._allowedChange = "minus_one_correction";
-	this._allowedAttempts = 2;
+	this._endGame = args.endGame?true:false;
+	this._allowedChange = args.allowedChange;
+	this._allowedAttempts = args.allowedAttempts;
 	
 	this._title = undefined;
 	this._description = undefined;
@@ -17,6 +17,8 @@ function chssGameModule(args, board, parent)
 	
 	this._info = undefined;
 	this._seperator = undefined;
+	this._buttonWrapper = undefined;
+	this._action = undefined;
 	this._endGameInfo = undefined;
 	
 	chssBoard.chssGame.setEdit(this._endGame);
@@ -36,7 +38,7 @@ chssGameModule.prototype.initGame = function(data)
 	this._pgnfile = chssHelper.loadGameFromJSON(data);
 	if(!this._endGame)
 	{
-		this.loadMetaData(data)
+		this.loadMetaData(data);
 		if(data.game_breaks)
 		{
 			for(var i=0; i<data.game_breaks.length; i++)
@@ -69,10 +71,26 @@ chssGameModule.prototype.initGame = function(data)
 
 chssGameModule.prototype.draw = function()
 {
-	this.addInfo();
 	this._seperator = new chssSeperator();
 	this._seperator.getWrapper().style.position = "absolute";
-	this._board.append(this._seperator.getWrapper());
+	this._board.appendBefore(this._seperator.getWrapper(), this._board.getCommentArea().getWrapper());
+	
+	this._info = new chssGameInfo(this._pgnfile);
+	this._info.getWrapper().style.position = "absolute";
+	this._board.append(this._info.getWrapper());
+	
+	this._endGameInfo = new chssEndGameInfo();
+	this._endGameInfo.getWrapper().style.position = "absolute";
+	this._board.append(this._endGameInfo.getWrapper());
+
+	this._buttonWrapper = document.createElement("div");
+	this._buttonWrapper.style.position = "absolute";
+	this._buttonWrapper.className = "buttonWrapper";
+	
+	this._action = new bigButton(chssLanguage.translate(973));
+	this._buttonWrapper.appendChild(this._action.getWrapper());
+	this._board.append(this._buttonWrapper);
+	
 	this.initialDraw();
 }
 
@@ -81,9 +99,10 @@ chssGameModule.prototype.initialDraw = function()
 	if(!this._endGame)
 	{
 		this._endGameInfo.getWrapper().style.display = "none";
+		this._buttonWrapper.style.display = "none";
 		this._info.getWrapper().style.display = "block";
 		
-		this._info.draw(chssGameInfo.SMALL, this._board.getBackground().offsetHeight*0.4, this._board.getWrapper().offsetHeight);
+		this._info.draw(chssGameInfo.SMALL, undefined, this._board.getWrapper().offsetHeight);
 		this._info.getWrapper().style.width = chssOptions.moves_size + "px";
 		this._info.getWrapper().style.top = "0px";
 		this._info.getWrapper().style.left = this._board.getBackground().offsetWidth + "px";
@@ -91,7 +110,7 @@ chssGameModule.prototype.initialDraw = function()
 		var height = this._info.getWrapper().offsetHeight,
 			heightRest = this._board.getBackground().offsetHeight - height;
 		
-		this._board.getCommentArea().getWrapper().style.height = height + "px";
+		this._board.getCommentArea().setHeight(chssCommentArea.SMALL, height, this._board.getWrapper().offsetHeight);
 		
 		this._seperator.getWrapper().style.top = height + "px";
 		this._seperator.getWrapper().style.left = this._board.getBackground().offsetWidth + "px";
@@ -107,19 +126,27 @@ chssGameModule.prototype.initialDraw = function()
 	{
 		this._board.getStatusImage().getImageElement().style.top = "0px";
 		this._board.getStatusImage().getImageElement().style.width = chssOptions.moves_size + "px";
-		this._board.getStatusImage().getImageElement().style.left = parseFloat(this._board.getBackground().style.width) + "px";
+		this._board.getStatusImage().getImageElement().style.left = this._board.getBackground().offsetWidth + "px";
 		this._board.getStatusImage().getImageElement().style.display = "none";
 		
 		this._info.getWrapper().style.display = "none";
 		this._endGameInfo.getWrapper().style.display = "block";
+		this._buttonWrapper.style.display = "block";
 		
 		this._endGameInfo.getWrapper().style.width = chssOptions.moves_size + "px";
 		this._endGameInfo.getWrapper().style.top = "0px";
 		this._endGameInfo.getWrapper().style.left = this._board.getBackground().offsetWidth + "px";
 		this._endGameInfo.draw(this._title, this._description, this._pgnfile.getResult(), this._board.getBackground().offsetHeight * 0.45);
 		
+		this._buttonWrapper.style.display = "block";
+		this._buttonWrapper.style.left = this._board.getBackground().offsetWidth + "px";
+		this._buttonWrapper.style.bottom = "0px";
+
+		this._action.setSize(this._board.getButtonWidth(), this._board.getButtonHeight());
+		this._action.changeState(chssLanguage.translate(973), this.tryAgain, this);
+		
 		var height = this._endGameInfo.getWrapper().offsetHeight,
-			heightRest = this._board.getBackground().offsetHeight - this._endGameInfo.getWrapper().offsetHeight;
+			heightRest = this._board.getBackground().offsetHeight - this._endGameInfo.getWrapper().offsetHeight - this._buttonWrapper.offsetHeight;
 		
 		this._seperator.getWrapper().style. top = height + "px";
 		this._seperator.getWrapper().style.left = this._board.getBackground().offsetWidth + "px";
@@ -131,8 +158,32 @@ chssGameModule.prototype.initialDraw = function()
 		this._board.getMovesList().getMoves().style.top = height + "px";
 		this._board.getMovesList().getMoves().style.height = heightRest + "px";
 		
+		height = height + this._board.getMovesList().getMoves().offsetHeight;
+		
+		this._board.getChange().getWrapper().style.top = height + "px";
+		
 		this._board.getCommentArea().getWrapper().style.display = "none";
 	}
+}
+
+chssGameModule.prototype.resize = function(diffCoeff)
+{
+	if(!this._endGame)
+	{
+		this._info.resize(diffCoeff);
+		this._info.getWrapper().style.width = chssOptions.moves_size + "px";
+		this._info.getWrapper().style.left = parseFloat(this._info.getWrapper().style.left) * diffCoeff + "px";
+	}
+	else
+	{
+		this._endGameInfo.getWrapper().style.width = parseFloat(this._endGameInfo.getWrapper().style.width) * diffCoeff + "px";
+		this._endGameInfo.getWrapper().style.left = parseFloat(this._endGameInfo.getWrapper().style.left) * diffCoeff + "px";
+		this._endGameInfo.draw(this._title, this._description, this._pgnfile.getResult(), this._board.getBackground().offsetHeight * 0.45);
+	}
+	
+	this._seperator.getWrapper().style.top = parseFloat(this._seperator.getWrapper().style.top) * diffCoeff + "px";
+	this._seperator.getWrapper().style.left = parseFloat(this._seperator.getWrapper().style.left) * diffCoeff + "px";
+	this._seperator.draw(chssOptions.moves_size);
 }
 
 chssGameModule.prototype.hide = function()
@@ -185,7 +236,7 @@ chssGameModule.prototype.getInitialMode = function()
 	if(this._endGame)
 		return [chssModuleManager.modes.ADD_MOVES_MODE, this._allowedChange, true];
 	else
-		return [chssModuleManager.modes.VIEW_MODE, chssModule.subModes.NOT_ACTIVE, false];
+		return [chssModuleManager.modes.VIEW_MODE, chssModuleManager.subModes.NOT_ACTIVE, false];
 }
 
 chssGameModule.prototype.getPGNFile = function()
@@ -193,16 +244,9 @@ chssGameModule.prototype.getPGNFile = function()
 	return this._pgnfile;
 }
 
-chssGameModule.prototype.addInfo = function()
+chssGameModule.prototype.tryAgain = function()
 {
-
-	this._info = new chssGameInfo(this._pgnfile);
-	this._info.getWrapper().style.position = "absolute";
-	this._board.append(this._info.getWrapper());
-	
-	this._endGameInfo = new chssEndGameInfo();
-	this._endGameInfo.getWrapper().style.position = "absolute";
-	this._board.append(this._endGameInfo.getWrapper());
+	this._parent.startNewGame((this._pgnfile.getMoves().length == 0 || this._pgnfile.getMoves()[0].notation != "..."), true);
 }
 
 chssGameModule.prototype.processResult = function()

@@ -1,6 +1,7 @@
-var chssOptions = {images_url: "assets/images",
+var chssOptions = {images_url: "assets/images/",
 				   root_url: "",
 				   url: "",
+				   stockfish_url: "../Stockfish/stockfish.js",
 	               board_size: 360,
 	               moves_size: 300,
 	               font_size: 16,
@@ -24,13 +25,12 @@ var chss_global_vars = {prevClientX: undefined,
 						prevSelectedY: undefined,
 						selectedX: undefined,
 						selectedY: undefined,
-						prevScrollTop: undefined,
-						prevScrollLeft: undefined,
 						localClick: false,
 						prevCursor: undefined,
 						prevDragElement: undefined,
 						prevDragChssPiece: undefined,
-						local: false}
+						local: false,
+						cancelDrag: false}
 
 function getPageOffset(element)
 {
@@ -46,6 +46,14 @@ function getPageOffset(element)
 	return cumulative;
 }
 
+if (typeof Object.create !== 'function') {
+    Object.create = function (o) {
+        function F() {}
+        F.prototype = o;
+        return new F();
+    };
+}
+
 function chssBoard(container, appArgs, args)
 {
 	this._container = container;
@@ -55,6 +63,7 @@ function chssBoard(container, appArgs, args)
 	this._width = undefined;
 	this._height = undefined;
 	this._boardDrawn = false;
+	this._imagesLoaded = false;
 	
 	if(chssOptions.images_url.charAt(chssOptions.images_url.length-1)!="/") 
 		chssOptions.images_url += "/";
@@ -68,35 +77,46 @@ function chssBoard(container, appArgs, args)
 chssBoard.prototype = {
 		initiate: function()
 		{
-			chssPreload(this.draw, this);
+			chssPreload(this.draw, this.loadComplete, this);
 		},
 		
 		draw: function()
 		{
 			chssBoard.chssGame = new chssGame();
 			//chssBoard.chssGame = new chssGame("rnbqkbnr/ppppppPp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-			//chssBoard.chssGame = new chssGame("8/6QK/8/8/8/8/8/1P5k w - - 0 1");
+			//chssBoard.chssGame = new chssGame("rn1q1bnr/pp1k1ppp/4p3/1b1pP3/3P4/2K5/PP3PPP/RNBQ1BNR w - - 0 1");
 			chssBoard.chssGame.setEdit(true);
 			chssBoard.board = new boardElement(this._container, appArgs.centerToScreen);
-			chssBoard.moduleManager = new chssModuleManager(this._args, chssBoard.board);
+			chssBoard.mobileManager = new chssMobileManager();
 			chssBoard.board.draw();
 			this._boardDrawn = true;
 			this.init_engine(false);
-			this.resize(false, false);
+			this.loadComplete();
+		},
+		
+		loadComplete: function(imagesLoaded)
+		{
+			if(typeof imagesLoaded !== 'undefined')
+				this._imagesLoaded = imagesLoaded;
+
+			if(this._boardDrawn && this._imagesLoaded)
+			{
+				chssBoard.moduleManager = new chssModuleManager(this._args, chssBoard.board);
+				this.resize(false, false);
+			}
 		},
 		
 		resize: function(width, height)
 		{
-			if(width===false && height===false)
+			if(width === false && height === false)
 				chssBoard.board.drawSize();
-			else if(!(width===false && height === false))
+			else if(!(width === false && height === false))
 			{
 				this._width = width;
 				this._height = height;
 			}
 			
-			
-			if(this._boardDrawn && typeof this._width != 'undefined' && typeof this._height != 'undefined')
+			if(this._boardDrawn && typeof this._width !== 'undefined' && typeof this._height !== 'undefined')
 				chssBoard.board.resize(this._width, this._height);
 		},
 		

@@ -10,16 +10,18 @@ function chssPuzzleModule(args, board, parent, custom)
 	this._temp = false;
 	this._neutral = false;
 	this._attemptsLeft = undefined;
+	this._requestUser = true;
 	
 	this._objectSerial = args.objectSerial;
 	this._guest = args.guest;
 	this._random = args.random;
-	this._attempts = 2; //args.attempts;
-	this._seconds = 120; //args.seconds;
+	this._attempts = args.attempts;
+	this._seconds = args.seconds;
 	
 	this._objectCorrect = undefined;
 	this._objectWrong = undefined;
 	this._setAttempt = undefined;
+	this._setId = undefined;
 	
 	this._pgnfile = null;
 	this._callback = null;
@@ -33,6 +35,7 @@ function chssPuzzleModule(args, board, parent, custom)
 	this._info = undefined;
 	this._action = undefined;
 	this._buttonWrapper = undefined;
+	this._guestForm = undefined;
 	this._maxHeight = undefined;
 	this._top = undefined;
 }
@@ -63,8 +66,30 @@ chssPuzzleModule.prototype.initData = function(callback, object)
 		this._callback = callback;
 		this._object = object;
 	}
-	//chssBoard.ajaxRequest.loadData("POST", "ajax/retrieve_data.php", "location=puzzle&object_serial=" + this._objectSerial, this.initPuzzle, this);
-	chssBoard.ajaxRequest.loadData("POST", "ajax/retrieve_data.php", "location=puzzle&" + (this._random?"random=1":"object_serial=" + this._objectSerial), this.init, this);
+
+	if(this._guest && this._random)
+	{
+		if(typeof this._guestForm === "undefined")
+		{
+			setTimeout(function(){callback.call(object);}, 10);
+		}
+		else
+		{
+			this.getGuestPuzzle();
+		}
+	}
+	else
+	{
+		//chssBoard.ajaxRequest.loadData("POST", "ajax/retrieve_data.php", "location=puzzle&object_serial=" + this._objectSerial, this.initPuzzle, this);
+		chssBoard.ajaxRequest.loadData("POST", "ajax/retrieve_data.php", "location=puzzle&" + (this._random?"random=1":"object_serial=" + this._objectSerial) + (this._requestUser?"&userRequest=1":""), this.init, this);
+		this._requestUser = false;
+	}
+}
+
+chssPuzzleModule.prototype.getGuestPuzzle = function()
+{
+	this._guestForm.getWrapper().style.display = "none";
+	chssBoard.ajaxRequest.loadData("POST", "ajax/retrieve_data.php", "location=puzzle&random=1&rating=" + this._guestForm.getRating(), this.init, this);
 }
 
 chssPuzzleModule.prototype.init = function(data)
@@ -82,6 +107,11 @@ chssPuzzleModule.prototype.init = function(data)
 		this._pgnfile.setComment(data.puzzle_properties.comment);
 		this._pgnfile.setThemes(data.themes);
 	}
+	if(data.user)
+	{
+		if(data.user)
+			chssBoard.moduleManager.setUser(new chssUser(data.user.username, data.user.name, data.user.surname, data.user.email, data.user.rating));
+	}
 	
 	this._attemptsLeft = this._attempts;
 	this._callback.call(this._object);
@@ -92,10 +122,20 @@ chssPuzzleModule.prototype.sendPuzzleSolution = function(validation, moves, time
 	var args = "action=register_new_ratings";
 	if(this._custom)
 		args = "action=register_new_ratings_set";
+	else if(this._guest)
+		args = "action=register_new_guest_rating"
 	args += "&serial=" + this._objectSerial;
 	args += "&serialSolution=" + (validation?this._objectCorrect:this._objectWrong);
-	args += "&total_moves=" + moves;
-	args += "&time_left=" + time_left;
+	if(!this._guest)
+	{
+		args += "&total_moves=" + moves;
+		args += "&time_left=" + time_left;
+	}
+	else
+	{
+		args += "&rating=" + this._guestForm.getRating();
+		args += "&email=" + encodeURI(this._guestForm.getEmail());
+	}
 	if(this._custom && this._setId != null)
 	{
 		args += "&setId=" + this._setId;
@@ -104,9 +144,15 @@ chssPuzzleModule.prototype.sendPuzzleSolution = function(validation, moves, time
 	chssBoard.ajaxRequest.loadData("POST", "ajax/insert_data.php", args, this.ratingsChanged, this);
 }
 
-chssPuzzleModule.prototype.ratingsChanged = function()
+chssPuzzleModule.prototype.ratingsChanged = function(data)
 {
-	console.log("ratings changed");
+	if(data.user.rating)
+	{
+		if(!this._guest)
+			chssBoard.moduleManager.getUser().setRating(data.user.rating);
+		else
+			this._guestForm.setRating(data.user.rating);
+	}
 }
 
 chssPuzzleModule.prototype.getInitialMode = function()
@@ -116,17 +162,28 @@ chssPuzzleModule.prototype.getInitialMode = function()
 
 chssPuzzleModule.prototype.getPGNFile = function()
 {
-	return this._pgnfile;
+	return this._pgnfile == null?new chssPGNFile():this._pgnfile;
 }
 
 chssPuzzleModule.prototype.draw = function(top)
 {
+	if(typeof this._guestForm === "undefined" && this._guest && this._random)
+	{
+		this._guestForm = new chssGuestForm(this.getGuestPuzzle, this);
+		this._guestForm.getWrapper().style.position = "absolute";
+		this._board.getWrapper().appendChild(this._guestForm.getWrapper());
+		this._guestForm.draw();
+		this._guestForm.getWrapper().style.top = (this._board.getWrapper().offsetHeight/2) - (this._guestForm.getWrapper().offsetHeight/2) + "px";
+		this._guestForm.getWrapper().style.left = (this._board.getWrapper().offsetWidth/2) - (this._guestForm.getWrapper().offsetWidth/2) + "px";
+		return false;
+	}
+	
 	if(this._pgnfile.getMoves().length != 0 && 
 			(this._pgnfile.getMoves()[0].getNotation() != "..." && this._board.getFlip()) ||
 			(this._pgnfile.getMoves()[0].getNotation() == "..." && !this._board.getFlip()))
 		this._board.rotate()
 	
-	if(typeof this._info == 'undefined')
+	if(typeof this._info === 'undefined')
 	{
 		this.addInfo();
 		this.addTimer();
@@ -173,12 +230,16 @@ chssPuzzleModule.prototype.initialDraw = function(top)
 	this._info.getWrapper().style.top = this._top + "px";
 	this._info.getWrapper().style.left = offset + "px";
 	this._info.getWrapper().style.height = offset - this._top + "px";
-	this._info.draw(this._pgnfile.getRating(), this._pgnfile.getComment(), this._pgnfile.getThemes(), this._maxHeight);
-
-	this._timer.stop();
-	this._timer.reset();
-	this.initiateTimer();
-	this._timer.onFinish(this.puzzleSolved, this);
+	this._info.showRating(this._random);
+	this._info.draw((this._guest?this._guestForm.getRating():chssBoard.moduleManager.getUser().getRating()), this._pgnfile.getComment(), this._pgnfile.getThemes(), this._maxHeight);
+	
+	if(this._seconds != -1)
+	{
+		this._timer.stop();
+		this._timer.reset();
+		this.initiateTimer();
+		this._timer.onFinish(this.puzzleSolved, this);
+	}
 }
 
 chssPuzzleModule.prototype.resize = function(diffCoeff)
@@ -199,8 +260,9 @@ chssPuzzleModule.prototype.resize = function(diffCoeff)
 	this._info.getWrapper().style.height = parseFloat(this._board.getBackground().style.height) - this._top + "px";
 	this._info.draw(this._pgnfile.getRating(), this._pgnfile.getComment(), this._pgnfile.getThemes(), this._maxHeight);
 	this._info.getWrapper().style.display = prevInfoDisplay;
-	
-	this.initiateTimer()
+
+	if(this._seconds != -1)
+		this.initiateTimer()
 }
 
 chssPuzzleModule.prototype.initiateTimer = function()
@@ -212,9 +274,9 @@ chssPuzzleModule.prototype.initiateTimer = function()
 		height = (24 * (chssOptions.board_size/360)) - topNegative*2,
 		top = parseFloat(this._board.getBackground().style.height) + topNegative,
 		left = leftNegative;
-	
-	this._timer.initiate(width, height, left, top, this._seconds);
 
+	this._timer.getTimerElement().style.display = "block";
+	this._timer.initiate(width, height, left, top, this._seconds);
 }
 
 chssPuzzleModule.prototype.show = function()
@@ -258,7 +320,7 @@ chssPuzzleModule.prototype.showResult = function(result)
 	this._board.getCommentArea().getWrapper().display = "none";
 	this._board.getCommentArea().getWrapper().style.top = this._top + "px";
 	this._board.getCommentArea().getWrapper().style.display = "block";
-	this._board.getCommentArea().getWrapper().style.height = (this._maxHeight * 0.6) + "px";
+	this._board.getCommentArea().setHeight(chssCommentArea.SMALL, this._maxHeight * 0.6);
 	this._info.getWrapper().style.display = "none";
 	this._parent.setMode(chssModuleManager.modes.VIEW_MODE);
 }
@@ -278,6 +340,7 @@ chssPuzzleModule.prototype.showStatus = function(status)
 chssPuzzleModule.prototype.addTimer = function()
 {
 	this._timer = new chssTimer(this._seconds);
+	this._timer.getTimerElement().style.display = "none";
 	this._board.append(this._timer.getTimerElement());
 }
 
@@ -332,7 +395,7 @@ chssPuzzleModule.prototype.neutral = function()
 	this._action.changeState(chssLanguage.translate(525), this.showInformation, this);
 	this.showStatus(chssStatusImage.NEUTRAL);
 	this._board.getCommentArea().getWrapper().style.top = this._board.getStatusImage().getImageElement().style.height + this._top;
-	this._board.getCommentArea().setHeight(this._maxHeight - parseFloat(this._board.getStatusImage().getImageElement().style.height));
+	this._board.getCommentArea().setHeight(chssCommentArea.SMALL, this._maxHeight - parseFloat(this._board.getStatusImage().getImageElement().style.height));
 	this._board.getCommentArea().getWrapper().style.display = "block";
 	this._neutral = true;
 }
@@ -378,7 +441,7 @@ chssPuzzleModule.prototype.processValidation = function()
 
 chssPuzzleModule.prototype.puzzleSolved =  function(validation)
 {
-	if(typeof validation == 'undefined')
+	if(typeof validation === 'undefined')
 		validation = false;
 	this.sendPuzzleSolution(validation, Math.floor(chssBoard.chssGame.getCurrentMove(false)/2), Math.round(this._timer.getProgressedTime()/1000), this._setAttempt);
 	this.validatePuzzleSolution(validation);

@@ -25,7 +25,7 @@ function pieceElement(x, y)
 	this._marking = document.createElement("div");
 	this._marking.style.position = "absolute";
 	this._marking.style.display = "none";
-	this._marking.style.backgroundColor = "green";
+	this._marking.style.backgroundColor = "#479203";
 	this._marking.style.top = "0px";
 	this._marking.style.left = "0px";
 	
@@ -131,13 +131,18 @@ pieceElement.prototype.onMouseOver = function(element)
 			{
 				if(chss_global_vars.localClick)
 					event.currentTarget.style.cursor = "pointer";
+				else if(chssBoard.moduleManager.getMode() == chssModuleManager.modes.VIEW_MODE)
+					event.currentTarget.style.cursor = "default";
 				else
 					event.currentTarget.style.cursor = chss_global_vars.prevCursor;
 			}
 			else
 				event.currentTarget.style.cursor = "pointer";
 		}
-	element.getPiece().onmouseout = function(event) { event.currentTarget.style.cursor = chss_global_vars.prevCursor; }
+	element.getPiece().onmouseout = function(event)
+	{
+		event.currentTarget.style.cursor = chss_global_vars.prevCursor;
+	}
 }
 
 pieceElement.prototype.dragStart = function(element, callbackDrag, callbackDrop)
@@ -148,11 +153,15 @@ pieceElement.prototype.dragStart = function(element, callbackDrag, callbackDrop)
 		
 		if(chssBoard.moduleManager.getMode() != chssModuleManager.modes.VIEW_MODE && chssBoard.chssGame.getResult() == chssGame.results.NONE && chssBoard.moduleManager.correctionAllowed())
 		{
-			if(!chss_global_vars.localClick && element.getChssPiece() != null)
-			{		
+			if(element.getChssPiece() != null && element.getChssPiece().getColor() == chssBoard.chssGame.active())
+			{	
+				chssBoard.board.clearDrag();
+				chssBoard.board.removeAvailableMoves();
+				
 				var x = chssBoard.board.getFlip()?7-element.getX():element.getX();
 				var y = chssBoard.board.getFlip()?7-element.getY():element.getY();		
 				
+				chssBoard.board.removePath();
 				chssBoard.board.drawAvailableMoves(x, y, element.getChssPiece().getAvailableMoves());
 				
 				chss_global_vars.prevClientX = event.clientX;
@@ -160,9 +169,6 @@ pieceElement.prototype.dragStart = function(element, callbackDrag, callbackDrop)
 					
 				chss_global_vars.prevSelectedX = x;
 				chss_global_vars.prevSelectedY = y;
-				
-				chss_global_vars.prevScrollTop = document.documentElement.scrollTop;
-				chss_global_vars.prevScrollLeft = document.documentElement.scrollLeft;
 		
 				dragElement = chssBoard.board.getDragElement();
 		
@@ -208,16 +214,25 @@ pieceElement.prototype.onDrag = function(event)
 	
 	chss_global_vars.prevClientX = event.clientX;
 	chss_global_vars.prevClientY = event.clientY;
+
+	if(!chss_global_vars.cancelDrag)
+	{
+		var coords = chssHelper.getBoardCoordFromEvent(event);
+		if(chss_global_vars.prevSelectedX != coords.x ||
+		   chss_global_vars.prevSelectedY != coords.y)
+		{
+				chss_global_vars.cancelDrag = true;
+		}
+	}
 }
 
 pieceElement.prototype.onDrop = function(event)
-{	
+{
 	event.preventDefault();
-	
-	var board = chssBoard.board.getBoard(),
-		rect = board.getBoundingClientRect();
-	chss_global_vars.selectedX = Math.floor((event.clientX - rect.left) / (45 * (chssOptions.board_size/360)));
-	chss_global_vars.selectedY = Math.floor((event.clientY - rect.top) / (45 * (chssOptions.board_size/360)));
+
+	var coords = chssHelper.getBoardCoordFromEvent(event);
+	chss_global_vars.selectedX = coords.x
+	chss_global_vars.selectedY = coords.y;
 	
 	if(chssBoard.board.getFlip())
 	{
@@ -243,8 +258,19 @@ pieceElement.prototype.onDrop = function(event)
 	{
 		chss_global_vars.prevDragElement.setChssPiece(chss_global_vars.prevDragChssPiece);
 		chss_global_vars.prevDragElement.draw();
-		chss_global_vars.localClick = true;
+		
+		if(chss_global_vars.cancelDrag)
+		{
+			chssBoard.board.clearDrag();
+			chssBoard.board.removeAvailableMoves();
+		}
+		else
+		{
+			chss_global_vars.localClick = true;
+		}
 	}
+	
+	chss_global_vars.cancelDrag = false;
 }
 
 pieceElement.prototype.conditionMove = function(x1, y1, x2, y2)
@@ -262,11 +288,14 @@ pieceElement.prototype.removePieceImage = function()
 	this._piece.style.cursor = "auto";
 }
 
-pieceElement.prototype.availableMove = function(boolean)
+pieceElement.prototype.availableMove = function(boolean, color)
 {
+	if(typeof color === "undefined")
+		color = "#479203";
 	if(boolean)
 	{
 		this._marking.style.display = "block";
+		this._marking.style.backgroundColor = color;
 	}
 	else
 	{
@@ -274,11 +303,14 @@ pieceElement.prototype.availableMove = function(boolean)
 	}
 }
 
-pieceElement.prototype.selectedPiece = function(boolean)
+pieceElement.prototype.selectedPiece = function(boolean, color)
 {	
+	if(typeof color === "undefined")
+		color = "#479203";
 	if(boolean)
 	{
 		this._selected.style.display = "block";
+		this._selected.style.borderColor = color;
 	}
 	else
 	{

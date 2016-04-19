@@ -132,7 +132,7 @@ chssRadio.prototype = {
 		onclick: function(fnc, obj)
 		{
 			this._onclickFunction = fnc;
-			if(typeof obj != 'undefined')
+			if(typeof obj !== 'undefined')
 				this._onclickObject = obj;
 			else
 				this._onclickObject = null;

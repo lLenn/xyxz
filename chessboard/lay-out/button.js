@@ -104,12 +104,7 @@ buttonElement.prototype.playingStopped = function()
 
 buttonElement.prototype.enlarge = function()
 {
-	if(this._enlarged)
-		this._buttonElement.innerHTML = "&#xE140;";
-	else
-		this._buttonElement.innerHTML = "&#xE097;";
-
-	this._enlarged = !this._enlarged;
+	this.setEnlarge(!this._enlarged);
 	chssBoard.board.fullscreen();
 }
 
@@ -121,4 +116,19 @@ buttonElement.prototype.getType = function()
 buttonElement.prototype.getButtonElement = function()
 {
 	return this._buttonElement;
+}
+
+buttonElement.prototype.getEnlarged = function()
+{
+	return this._enlarged;
+}
+
+buttonElement.prototype.setEnlarge = function(enlarged)
+{
+	this._enlarged = enlarged;
+	
+	if(!this._enlarged)
+		this._buttonElement.innerHTML = "&#xE140;";
+	else
+		this._buttonElement.innerHTML = "&#xE097;";
 }

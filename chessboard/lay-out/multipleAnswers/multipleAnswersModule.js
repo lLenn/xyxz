@@ -60,8 +60,6 @@ chssMultipleAnswersModule.prototype = {
 		
 		initData: function(callback, object)
 		{
-			if(typeof load == "undefined")
-				true;
 			if(callback != null)
 			{
 				this._callback = callback;
@@ -111,7 +109,7 @@ chssMultipleAnswersModule.prototype = {
 		
 		draw: function(top)
 		{
-			if(typeof this._info == 'undefined')
+			if(typeof this._info === 'undefined')
 			{
 				this.addQuestionInfo();
 				this.addActions();
@@ -162,7 +160,7 @@ chssMultipleAnswersModule.prototype = {
 			this._info.getWrapper().style.width = chssOptions.moves_size + "px";
 			this._info.getWrapper().style.top = this._top + "px";
 			this._info.getWrapper().style.left = this._board.getBackground().offsetWidth + "px";
-			this._info.setHeight(this._board.getWrapper().offsetHeight - this._buttonWrapper.offsetHeight - this._answersWrapper.offsetHeight - this._top);
+			this._info.setHeight(chssCommentArea.SMALL, this._board.getWrapper().offsetHeight - this._buttonWrapper.offsetHeight - this._answersWrapper.offsetHeight - this._top);
 			this._info.draw();
 		},
 		
@@ -191,7 +189,7 @@ chssMultipleAnswersModule.prototype = {
 				this._info.getWrapper().style.width = chssOptions.moves_size + "px";
 				this._info.getWrapper().style.top = parseFloat(this._info.getWrapper().style.top) * diffCoeff + "px";
 				this._info.getWrapper().style.left = this._board.getBackground().offsetWidth + "px";
-				this._info.setHeight(this._board.getWrapper().offsetHeight - this._buttonWrapper.offsetHeight - this._answersWrapper.offsetHeight - this._top);
+				this._info.setHeight(chssCommentArea.SMALL, this._board.getWrapper().offsetHeight - this._buttonWrapper.offsetHeight - this._answersWrapper.offsetHeight - this._top);
 				this._info.draw();
 			}
 			else
@@ -248,7 +246,7 @@ chssMultipleAnswersModule.prototype = {
 		
 		solutionRegistered: function()
 		{
-			console.log("registered question solution!");
+			//console.log("registered question solution!");
 		},
 		
 		showResult: function(result)

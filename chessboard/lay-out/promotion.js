@@ -102,8 +102,6 @@ promotionPopUp.prototype.onSelect = function(color, piececode)
 	this._promotionPopUp.style.display = "none";
 	
 	this._callback(color, piececode);
-	chssBoard.engine.think();
-	chssBoard.moduleManager.redraw();
 }
 
 promotionPopUp.prototype.getColor = function()

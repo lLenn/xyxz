@@ -1,6 +1,7 @@
 function chssAjaxRequest()
 {
 	this._ajaxConns = new Array();
+	this._logout = false;
 }
 
 chssAjaxRequest.prototype = 
@@ -27,6 +28,8 @@ chssAjaxRequest.prototype =
 			
 			if(chss_global_vars.local)
 				vars += "&local=1";
+			if(this._logout)
+				vars += "&logout=1";
 
 			if(method=="GET")
 				page = page + "?" + vars;
@@ -37,7 +40,7 @@ chssAjaxRequest.prototype =
 			{
 				  if(event.currentTarget.readyState == 4 && event.currentTarget.status == 200)
 				  {
-					  console.log(event.currentTarget.responseText);
+					  //console.log(event.currentTarget.responseText);
 					  try
 					  {
 						  var data = JSON.parse(event.currentTarget.responseText);
@@ -93,5 +96,10 @@ chssAjaxRequest.prototype =
 				this._ajaxConns.push(new XMLHttpRequest());
 			else
 				this._ajaxConns.push(new ActiveXObject("microsoft.XMLHTTP"));
+		},
+		
+		setLogout: function(logout)
+		{
+			this._logout = logout;
 		}
 }

@@ -1,8 +1,8 @@
 function chssInfoComponent(label, text)
 {
-	if(typeof label == 'undefined')
+	if(typeof label === 'undefined')
 		label = '';
-	if(typeof text == 'undefined')
+	if(typeof text === 'undefined')
 		text = '';
 	
 	this._wrapper = document.createElement("div");
@@ -36,7 +36,7 @@ chssInfoComponent.prototype = {
 		
 		setText: function(text, alignment)
 		{
-			if(typeof alignment == 'undefined')
+			if(typeof alignment === 'undefined')
 				alignment = 'left';
 			this._text.innerHTML = text;
 			this._text.style.textAlign = alignment;

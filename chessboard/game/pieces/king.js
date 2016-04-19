@@ -130,3 +130,12 @@ chssKing.prototype.addAvailableMoves = function(x, y, color, game, check)
 	
 	return false;
 }
+
+chssKing.prototype.getMovePath = function(x1, y1, x2, y2)
+{
+	var diffX = x2 - x1;
+	if(Math.abs(diffX) == 2)
+		return [[x1, y1], [x1 + diffX/2, y1], [x2, y2]];
+	else
+		return [[x1, y1], [x2, y2]];
+}

@@ -283,13 +283,13 @@ uploadElement.prototype.addMovesAndComments = function(moves, pgnfile, parent)
 						game.loadMoves();
 						
 						game.changeBoard(String(pgnfile.getMoves().length-1));
-						console.log(pgnfile.getMoves().length);
+						//console.log(pgnfile.getMoves().length);
 						pgnfile.setFen(game.newFenFromCurrentBoard(false, true, false, false));
-						console.log(pgnfile.getFen());
+						//console.log(pgnfile.getFen());
 						pgnfile.setStart(number);
 						moveCorrection = ((number-1)*2);
-						console.log(pgnfile.getMoves().length);
-						console.info(pgnfile.getMoves());
+						//console.log(pgnfile.getMoves().length);
+						//console.info(pgnfile.getMoves());
 						pgnfile.setMoves(pgnfile.getMoves().slice(pgnfile.getMoves().length-1));
 						language_statics.language = prevLang;
 						beginIndex = 4;

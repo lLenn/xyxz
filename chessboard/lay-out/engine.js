@@ -4,6 +4,17 @@ function engineElement()
 	this._engineElement.id = "engineWrapper";
 	this.show(false);
 
+	this._new = document.createElement("span");
+	this._new.innerHTML = "Nieuw Spel: ";
+	this._cbBlack = document.createElement("input");
+	this._cbBlack.type = "checkbox";
+	this._newBl = document.createElement("span");
+	this._newBl.innerHTML = " speel m. Zwart ";
+	this._startGame = document.createElement("input");
+	this._startGame.type = "button";
+	this._startGame.value = "Start Game";
+	this.newGame();
+	
 	this._activate = document.createElement("span");
 	this._activate.innerHTML = "Activeer AI: ";
 	this._skillLevel = document.createElement("span");
@@ -11,6 +22,12 @@ function engineElement()
 	this._checkbox = document.createElement("input");
 	this._checkbox.type = "checkbox";
 	this.onlineChange();
+
+	this._evaluate = document.createElement("span");
+	this._evaluate.innerHTML = "Enkel evaluatie: ";
+	this._cbEval = document.createElement("input");
+	this._cbEval.type = "checkbox";
+	this.evalChange();
 	
 	this._time = document.createElement("input");
 	this._time.type = "text";
@@ -70,10 +87,18 @@ function engineElement()
 	}
 	this.ratingChange();
 
+	this._engineElement.appendChild(this._new);
+	this._engineElement.appendChild(this._cbBlack);
+	this._engineElement.appendChild(this._newBl);
+	this._engineElement.appendChild(this._startGame);
+	this._engineElement.appendChild(document.createElement("br"));
 	this._engineElement.appendChild(this._activate);
 	this._engineElement.appendChild(this._checkbox);
 	this._engineElement.appendChild(this._skillLevel);
 	this._engineElement.appendChild(this._rating);
+	this._engineElement.appendChild(document.createElement("br"));
+	this._engineElement.appendChild(this._evaluate);
+	this._engineElement.appendChild(this._cbEval);
 	this._engineElement.appendChild(document.createElement("br"));
 	this._engineElement.appendChild(this._timeText);
 	this._engineElement.appendChild(this._time);
@@ -96,11 +121,28 @@ function engineElement()
 	this._engineElement.appendChild(this._maxErrInfo);
 }
 
+engineElement.prototype.newGame = function()
+{
+	var val = this._cbBlack;
+	this._startGame.onclick = function()
+	{
+		chssBoard.moduleManager.startNewGame(!val.checked);
+	}
+}
+
 engineElement.prototype.onlineChange = function()
 {
 	this._checkbox.onchange = function(event)
 	{
-		chssBoard.engine.setOnline(event.currentTarget.checked);
+		chssBoard.engine.setOnline(event.currentTarget.checked);		
+	}
+}
+
+engineElement.prototype.evalChange = function()
+{
+	this._cbEval.onchange = function(event)
+	{
+		chssBoard.engine.setEvalOnly(event.currentTarget.checked);
 	}
 }
 

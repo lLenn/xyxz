@@ -1,11 +1,8 @@
 function chssLinkButton()
 {
-	var paddingHor = 10 * (chssOptions.moves_size/200),
-		paddingVer = 2 * (chssOptions.board_size/360);
-	
+	this._selected;
 	this._linkWrapper= document.createElement("div");
 	this._linkButton = document.createElement("div");
-	this._linkButton.style.margin = -paddingVer + "px " + paddingHor + "px " + paddingVer*2 + "px";
 	this._linkWrapper.appendChild(this._linkButton);
 	this.selected(false);
 }
@@ -17,6 +14,10 @@ chssLinkButton.prototype = {
 		},
 		setFontSize: function(fontSize)
 		{
+			var paddingHor = 10 * (chssOptions.moves_size/200),
+				paddingVer = 2 * (chssOptions.board_size/360);
+			
+			this._linkButton.style.margin = -paddingVer + "px " + paddingHor + "px " + paddingVer*2 + "px";
 			this._linkButton.style.fontSize = fontSize;
 		},
 		getWrapper: function()
@@ -41,6 +42,11 @@ chssLinkButton.prototype = {
 		},
 		selected: function(selected)
 		{
+			if(typeof selected === "undefined")
+				return this._selected;
+			else
+				this._selected = selected;
+			
 			if(!selected)
 			{
 				this._linkWrapper.style.cursor = "pointer";
@@ -52,6 +58,7 @@ chssLinkButton.prototype = {
 			else
 			{
 				this._linkWrapper.style.cursor = "auto";
+				this._linkWrapper.style.backgroundColor = chssOptions.background_color;
 				this._linkButton.style.color = "#000000";
 				this._linkButton.style.border = "none";
 				this._linkWrapper.onmouseover = null;

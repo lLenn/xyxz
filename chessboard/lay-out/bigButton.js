@@ -25,6 +25,8 @@ bigButton.prototype = {
 			this._wrapper.style.height = "auto";
 			this._wrapper.style.width = "auto";
 			
+			this.setText(this._label.innerHTML);
+			
 			var paddingVer = (height - this._label.offsetHeight)/2 - parseFloat(chssHelper.getComputedStyle(this._wrapper, "border-top-width")),
 				paddingHor = (width - Math.floor(this._label.offsetWidth))/2 - parseFloat(chssHelper.getComputedStyle(this._wrapper, "border-top-width"));
 			

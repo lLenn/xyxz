@@ -1,3 +1,10 @@
+chssPiece.pieceScore = {K: [10, 0],
+					 	Q: [9, 0],
+					 	R: [5, 0],
+					 	B: [3, 1],
+					 	N: [3, 0],
+					 	_: [1, 0]}
+
 function chssPiece(color, piececode)
 {
 	this._color = color;
@@ -100,6 +107,17 @@ chssPiece.prototype.checkCheckReturn = function(x, y, chkX, chkY, board, game)
 	}
 	
 	return check;
+}
+
+chssPiece.comparePieceScore = function(pieceA, pieceB)
+{
+	if(pieceA.getColor().toUpperCase() != pieceB.getColor().toUpperCase())
+		return pieceA.getColor().toUpperCase() == "W"?1:-1;
+	
+	var scoreA = chssPiece.pieceScore[pieceA.getPiececode()],
+		scoreB = chssPiece.pieceScore[pieceB.getPiececode()];
+	
+	return (scoreA[0] == scoreB[0]?(scoreA[1] == scoreB[1]?0:(scoreA[1] > scoreB[1]?1:-1)):(scoreA[0] > scoreB[0]?1:-1));
 }
 
 chssPiece.Factory = function(color, piececode)
@@ -255,6 +273,7 @@ chssPiece.convertToMove = function(move, game)
 								game.adjustBoard(moveCheck, -1, true);
 							else
 								game.adjustBoard(new chssMove(x1,y1,x2,y2), -1, true);
+
 							if(game.checkCheck(false) && numberMoves != 2)
 							{
 								x1 = -1;
@@ -270,6 +289,7 @@ chssPiece.convertToMove = function(move, game)
 				}
 			}
 		}
+
 		if(x1 != -1 && y1 != -1 && x2 != -1 && y2 != -1 && numberMoves == 1)
 		{
 			var moveRtn = new chssMove(NaN,NaN,NaN,NaN);
@@ -396,7 +416,7 @@ chssPiece.convertMoveToPGN = function(move, color, board, enpassent, currentmove
 										currentNot += chssPiece.convertToLetter(move.getX1());
 									else
 									{
-										if(jT != move.getY1())
+										if(jT != move.getX1())
 											currentNot += chssPiece.convertToLetter(move.getX1());
 										else
 											currentNot += 8-move.getY1();

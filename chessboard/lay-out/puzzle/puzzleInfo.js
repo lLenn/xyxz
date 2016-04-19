@@ -1,10 +1,12 @@
 function chssPuzzleInfo()
 {	
+	this._showRating = false;
+	
 	this._wrapper = document.createElement("div");
 	this._wrapper.style.backgroundColor = chssOptions.background_color;
 	this._wrapper.className = "wrapper";
 	
-	this._rating = new chssInfoComponent(chssLanguage.translate(274));
+	this._rating = new chssInfoComponent(chssLanguage.translate(1411));
 	this._comment = new chssInfoComponent(chssLanguage.translate(352));
 	this._themes = new chssInfoComponent(chssLanguage.translate(152));
 	
@@ -24,7 +26,7 @@ chssPuzzleInfo.prototype = {
 			
 			var max_width = parseFloat(this._wrapper.offsetWidth)*0.8;
 			
-			if(!isNaN(rating) && rating>0)
+			if(!isNaN(rating) && rating>0 && this._showRating)
 				this._rating.setText(rating);
 			else
 			{
@@ -41,7 +43,7 @@ chssPuzzleInfo.prototype = {
 			{
 				txt += chssLanguage.translate(themes[i]);
 				if(i+1!=themes.length)
-					txt += "</br>";
+					txt += "<br/>";
 			}
 			if(txt != "")
 				this._themes.setText(chssHelper.wordWrap(this._themes.getTextComponent(), txt, max_width, false, false));
@@ -79,5 +81,10 @@ chssPuzzleInfo.prototype = {
 		getWrapper: function()
 		{
 			return this._wrapper;
+		},
+		
+		showRating: function(show)
+		{
+			this._showRating = show;
 		}
 }

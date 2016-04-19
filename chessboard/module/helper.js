@@ -7,21 +7,21 @@ chssHelper.loadGameFromJSON = function(data)
 		var game = new chssGame(data.game.fen);
 		game.setEdit(true);
 		if(data.game.moves)
-			chssHelper.parseMoves(data.game.moves, game, (typeof data.game.firstMove != 'undefined'?data.game.firstMove:null), -1, 0);
+			chssHelper.parseMoves(data.game.moves, game, (typeof data.game.firstMove !== 'undefined'?data.game.firstMove:null), -1, 0);
 		
 		if(data.comments)
 		{
 			for(var i=0; i<data.comments.length; i++)
 			{
-				game.getPGNFile().getMoves()[data.comments[i].halfMove - 1].setComment(0, data.comments[i].comment, "");
+				game.getPGNFile().getMoves()[data.comments[i].halfMove - 1].setComment((data.comments[i].name?chssHelper.randomCharSet():0), data.comments[i].comment, (data.comments[i].name?data.comments[i].name:""));
 			}
 		}
-		
+
 		if(data.variations)
 		{
 			chssHelper.loadVariations(data.variations, 0, game);
 		}
-		
+
 		if(data.variation_comments)
 		{
 			for(var i=0; i<data.variation_comments.length; i++)
@@ -32,12 +32,12 @@ chssHelper.loadGameFromJSON = function(data)
 					var variation = game.getPGNFile().getVariations()[j];
 					if(variation.getVariationId() == variationComment.variationId)
 					{
-						variation.getMoves()[variationComment.halfMove - 1].setComment(0, variationComment.comment, "");
+						variation.getMoves()[variationComment.halfMove - 1].setComment((variationComment.name?chssHelper.randomCharSet():0), variationComment.comment, (variationComment.name?variationComment.name:""));
 					}
 				}
 			}
 		}
-		
+
 		return game.getPGNFile();
 	}
 	
@@ -53,6 +53,11 @@ chssHelper.loadVariations = function(variations, parentId, game)
 		{
 			chssHelper.parseMoves(variation.moves, game, "", variation.parentVariationId, variation.halfMove);
 			game.getPGNFile().getVariations()[game.getPGNFile().getVariations().length-1].setVariationId(variation.variationId);
+			if(variation.name)
+			{
+				game.getPGNFile().getVariations()[game.getPGNFile().getVariations().length-1].setUserId(chssHelper.randomCharSet());
+				game.getPGNFile().getVariations()[game.getPGNFile().getVariations().length-1].setUsername(variation.name);
+			}
 			if(variation.solution)
 			{
 				game.getPGNFile().getVariations()[game.getPGNFile().getVariations().length-1].setSolution(variation.solution);
@@ -112,7 +117,7 @@ chssHelper.parseMoves = function(moves, game, firstMove, parentVariationId, half
  * 			Recommended is a empty element, the returned string will always render taking the parents content in consideration.
  * 	String: the string that needs to be wrapped
  * 	Width: the width where to begin a newline
- * 	brArg: false = remove existing </br>'s during processing, true = keep existing </br> tags during processing and add a new one after each word; recommended: false
+ * 	brArg: false = remove existing <br/>'s during processing, true = keep existing <br/> tags during processing and add a new one after each word; recommended: false
  *  newLine: is the intended string being used after a newline? true : false
  *  fontSize: the fontsize of the string; default = inherited
  */
@@ -133,7 +138,7 @@ chssHelper.wordWrap = function(parent, string, width, brArg, newLine, fontSize)
 		word = undefined,
 		line = document.createElement("div"),
 		span = document.createElement("div"),
-		words = string.replace(/<\/br>/g, "</br> ").split(" ");
+		words = string.replace(/<br\/>/g, "<br/> ").split(" ");
 	
 	if(typeof fontSize === "undefined")
 		fontSize = parseFloat(chssHelper.searchFontSize(parent));
@@ -150,7 +155,7 @@ chssHelper.wordWrap = function(parent, string, width, brArg, newLine, fontSize)
 		parent.appendChild(line);
 		parent.appendChild(span);
 		
-		if(word.indexOf("</br>")!=-1 || brArg)
+		if(word.indexOf("<br/>")!=-1 || brArg)
 		{
 			if(!brArg)
 				word = word.substr(0, word.length-5);
@@ -163,7 +168,7 @@ chssHelper.wordWrap = function(parent, string, width, brArg, newLine, fontSize)
 		{
 			if(length<=6)
 			{
-				output += innerLine.substr(0, innerLine.length-1) + "</br>" + (br?word + "</br>":"");
+				output += innerLine.substr(0, innerLine.length-1) + "<br/>" + (br?word + "<br/>":"");
 				innerLine = (br?"":word + " ");
 			}
 			else
@@ -172,7 +177,7 @@ chssHelper.wordWrap = function(parent, string, width, brArg, newLine, fontSize)
 
 				if(span.offsetWidth + line.offsetWidth > width)
 				{
-					output += innerLine.substr(0, innerLine.length-1) + "</br>";
+					output += innerLine.substr(0, innerLine.length-1) + "<br/>";
 					subline = chssHelper.wordWrap(parent, word, width, br, false, fontSize);
 				}
 				else
@@ -185,31 +190,31 @@ chssHelper.wordWrap = function(parent, string, width, brArg, newLine, fontSize)
 							span.innerHTML = word.substr(0, j);
 							if(span.offsetWidth + line.offsetWidth > width)
 							{
-								output += innerLine + word.substr(0, j-1) + "</br>";
+								output += innerLine + word.substr(0, j-1) + "<br/>";
 								subline = chssHelper.wordWrap(parent, word.substr(j-1), width, br, true, fontSize);
 								break;
 							}
 						}
 						if(j==length)
 						{
-							subline = innerLine.substr(0, innerLine.length-1) + "</br>" + word;
+							subline = innerLine.substr(0, innerLine.length-1) + "<br/>" + word;
 						}
 					}
 					else
 					{
-						output += innerLine + "</br>";
+						output += innerLine + "<br/>";
 						subline = chssHelper.wordWrap(parent, word, width, br, true, fontSize);
 					}
 				}
-				sublines = subline.split("</br>");
+				sublines = subline.split("<br/>");
 				for(var k=0; k<sublines.length; k++)
 				{
 					if(k!=sublines.length-1)
-						output += sublines[k] + "</br>";
+						output += sublines[k] + "<br/>";
 					else
 					{
 						if(br)
-							output += sublines[k] + "</br>";
+							output += sublines[k] + "<br/>";
 						innerLine = (br?"":sublines[k] + " ");
 					}
 				}
@@ -219,7 +224,7 @@ chssHelper.wordWrap = function(parent, string, width, brArg, newLine, fontSize)
 		{
 			if(br)
 			{
-				output += innerLine + word + "</br>";
+				output += innerLine + word + "<br/>";
 				innerLine = "";
 			}
 			else
@@ -230,8 +235,8 @@ chssHelper.wordWrap = function(parent, string, width, brArg, newLine, fontSize)
 		parent.removeChild(line);
 		parent.removeChild(span);
 	}
-	output += innerLine + (br?"</br>":"");
-	return output.substr(0, output.length-1).replace(/(<\/br>)+/g, "</br>");
+	output += innerLine + (br?"<br/>":"");
+	return output.substr(0, output.length-1).replace(/(<\/br>)+/g, "<br/>");
 }
 
 chssHelper.searchFontSize = function(element)
@@ -303,4 +308,34 @@ chssHelper.getComputedStyle = function(element, property)
 		}
 		return element.currentStyle[property];
 	}
+}
+
+chssHelper.getBoardCoordFromEvent = function(event)
+{
+	var board = chssBoard.board.getBoard(),
+		rect = board.getBoundingClientRect();
+	
+	return {x: Math.floor((event.clientX - rect.left) / (45 * (chssOptions.board_size/360))), y: Math.floor((event.clientY - rect.top) / (45 * (chssOptions.board_size/360)))};
+}
+
+chssHelper.getScrollDocument = function()
+{
+	scroll = {left: window.scrollX || window.pageXOffset ||document.body.scrollLeft + (document.documentElement && document.documentElement.scrollLeft), top: window.scrollY || window.pageYOffset ||document.body.scrollTop + (document.documentElement && document.documentElement.scrollTop)};
+	return scroll;
+}
+
+chssHelper.randomCharSet = function(length)
+{
+	var charset, ret, i;
+	
+	if(typeof length === "undefined")
+		length = 62;
+	
+	charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	ret = "";
+	for(i=0;i<length;i++)
+	{
+		ret += charset.charAt(Math.floor(Math.random() * 61));
+	}
+	return ret;
 }

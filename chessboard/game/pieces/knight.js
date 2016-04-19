@@ -76,3 +76,12 @@ chssKnight.prototype.addAvailableMoves = function(x, y, color, game, check)
 	}
 	return blockedCheck;
 }
+
+chssKnight.prototype.getMovePath = function(x1, y1, x2, y2)
+{
+	var diffX = x2 - x1,
+		diffY = y2 - y1,
+		x3 = x1 + (diffX/Math.abs(diffX)) * (Math.abs(diffX)==2?1:0),
+		y3 = y1 + (diffY/Math.abs(diffY)) * (Math.abs(diffY)==2?1:0);
+	return [[x1, y1], [x3, y3], [x2, y2]];
+}

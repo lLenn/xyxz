@@ -8,17 +8,9 @@ function chssGameInfo(pgnfile)
 	this._minSize = undefined;
 	this._maxSize = undefined;
 	
-	var fontSize = 16 * (chssOptions.board_size/360),
-		border = 1 * (chssOptions.board_size/360),
-		fontSize2 = 11 * (chssOptions.board_size/360),
-		extra = 4 * (chssOptions.board_size/360);
-	
-	this._padding = 17 * (chssOptions.board_size/360);
-	
 	this._wrapper = document.createElement("div");
+	this._wrapper.style.display = "relative";
 	this._wrapper.style.backgroundColor = chssOptions.background_color;
-	this._wrapper.style.paddingTop = this._padding + "px";
-	this._wrapper.style.fontSize = fontSize + "px";
 	
 	this._subWrapper = document.createElement("div");
 	this._subWrapper.style.overflowY = "auto";
@@ -135,11 +127,6 @@ function chssGameInfo(pgnfile)
 	this._changeView.style.position = "absolute";
 	this._changeView.style.top = "0px";
 	this._changeView.style.right = "0px";
-	this._changeView.style.border = border + "px solid " + chssOptions.select_color;
-	this._changeView.style.fontSize = fontSize2 + "px";
-	this._changeView.style.height = fontSize2 + extra + "px";
-	this._changeView.style.width = fontSize2 + extra + "px";
-	//this._changeView.style.marginTop = extra + "px";
 	this.changeView();
 	this._wrapper.appendChild(this._changeView);
 	
@@ -158,6 +145,23 @@ chssGameInfo.prototype = {
 
 		draw: function(size, minSize, maxSize)
 		{
+			var border = 1 * (chssOptions.board_size/360),
+				fontSize2 = 11 * (chssOptions.board_size/360),
+				extra = 4 * (chssOptions.board_size/360),
+				fontSize = 16 * (chssOptions.board_size/360),
+				padding = 17 * (chssOptions.board_size/360);
+			
+			this._wrapper.style.height = "";
+			this._subWrapper.style.height = "";
+
+			this._wrapper.style.paddingTop = padding + "px";
+			this._wrapper.style.fontSize = fontSize + "px";
+			
+			this._changeView.style.border = border + "px solid " + chssOptions.select_color;
+			this._changeView.style.fontSize = fontSize2 + "px";
+			this._changeView.style.height = fontSize2 + extra + "px";
+			this._changeView.style.width = fontSize2 + extra + "px";
+			
 			var element = undefined;
 			for(var i=0; i<8; i++)
 			{
@@ -172,32 +176,32 @@ chssGameInfo.prototype = {
 					case 6: element = this._opening; break
 					case 7: element = this._annotator; break
 				}
-				if(size == chssGameInfo.SMALL && typeof element != 'undefined')
+				if(size == chssGameInfo.SMALL && typeof element !== 'undefined')
 					element.getWrapper().style.display = "none";
-				else if(size == chssGameInfo.BIG && typeof element != 'undefined')
+				else if(size == chssGameInfo.BIG && typeof element !== 'undefined')
 					element.getWrapper().style.display = "block";
 			}
 			
-			var check = this._subWrapper.offsetHeight + this._padding*2 + this._changeView.offsetHeight;
+			var check = this._subWrapper.offsetHeight + padding*2;
 			this._size = size;
-			if(typeof minSize != 'undefined' && minSize < check)
+			if(typeof minSize !== 'undefined' && minSize < check)
 				this._minSize = minSize;
-			else if(typeof minSize != 'undefined')
+			else
 				this._minSize = check;
-			if(typeof maxSize != 'undefined')
+			if(typeof maxSize !== 'undefined')
 				this._maxSize = maxSize;
 			
 			if(size == chssGameInfo.SMALL)
 			{
-				this._subWrapper.style.height = (this._minSize - this._padding) + "px";
-				this._wrapper.style.height = (this._minSize - this._padding)  + "px";
+				this._subWrapper.style.height = (this._minSize - padding) + "px";
+				this._wrapper.style.height = (this._minSize - padding)  + "px";
 				this._changeView.innerHTML = "+";
 				this._changeView.title = chssLanguage.translate(1405);
 			}
 			else if(size == chssGameInfo.BIG)
 			{
-				this._subWrapper.style.height = (this._maxSize - this._padding)  + "px";
-				this._wrapper.style.height = (this._maxSize - this._padding)  + "px";
+				this._subWrapper.style.height = (this._maxSize - padding)  + "px";
+				this._wrapper.style.height = (this._maxSize - padding)  + "px";
 				this._changeView.innerHTML = "&ndash;";
 				this._changeView.title = chssLanguage.translate(1406);
 			}
@@ -218,11 +222,16 @@ chssGameInfo.prototype = {
 					case 9: element = this._opening; break
 					case 10: element = this._annotator; break
 				}
-				if(size == chssGameInfo.SMALL && typeof element != 'undefined')
+				if(size == chssGameInfo.SMALL && typeof element !== 'undefined')
 					element.getTextComponent().style.marginRight = (13 * (chssOptions.moves_size/200)) + "px";
-				else if(size == chssGameInfo.BIG && typeof element != 'undefined' && (this._subWrapper.offsetHeight < this._subWrapper.scrollHeight))
+				else if(size == chssGameInfo.BIG && typeof element !== 'undefined' && (this._subWrapper.offsetHeight < this._subWrapper.scrollHeight))
 					element.getTextComponent().style.marginRight = (13 * (chssOptions.moves_size/200)) - 17 + "px";
 			}
+		},
+		
+		resize: function(diffCoeff)
+		{
+			this.draw(this._size, this._minSize * diffCoeff, this._maxSize * diffCoeff);
 		},
 		
 		changeView: function()

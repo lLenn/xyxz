@@ -14,7 +14,7 @@ function chssLoadScreen()
 	this._wrapper.style.left = "0px";
 	this._wrapper.style.bottom = "0px";
 	this._wrapper.style.right = "0px";
-	this._wrapper.style.zIndex = "1000";
+	//this._wrapper.style.zIndex = "1000";
 	
 	this._loadscreen = document.createElement("div");
 	
@@ -33,7 +33,7 @@ function chssLoadScreen()
 	this._progressTemp = document.createElement("div");
 	this._progressTemp.style.background = chssOptions.select_color;
 	this._progressTemp.style.position = "absolute";
-	this._progressTemp.style.display = "hidden";
+	this._progressTemp.style.display = "none";
 	this._progressWrapper.appendChild(this._progress);
 	this._progressWrapper.appendChild(this._progressTemp);
 	

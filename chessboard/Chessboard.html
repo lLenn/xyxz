@@ -16,7 +16,7 @@
 <script type="text/javascript" src="game/pieces/knight.js"></script>
 <script type="text/javascript" src="game/pieces/queen.js"></script>
 <script type="text/javascript" src="game/pieces/king.js"></script>
-<script type="text/javascript" src="language/language.js"></script>
+<script type="text/javascript" src="module/language.js"></script>
 <script type="text/javascript" src="assets/json2.js"></script>
 <script type="text/javascript" src="assets/languages/language_NL.js"></script>
 <script type="text/javascript" src="game/engine.js"></script>
@@ -28,12 +28,15 @@
 <script type="text/javascript" src="game/game.js"></script>
 <script type="text/javascript" src="game/nag.js"></script>
 <script type="text/javascript" src="game/preload.js"></script>
+<script type="text/javascript" src="game/user.js"></script>
 <script type="text/javascript" src="module/moduleManager.js"></script>
+<script type="text/javascript" src="module/mobile.js"></script>
 <script type="text/javascript" src="lay-out/puzzle/puzzleModule.js"></script>
 <script type="text/javascript" src="lay-out/selection/selectionModule.js"></script>
 <script type="text/javascript" src="lay-out/game/gameModule.js"></script>
 <script type="text/javascript" src="lay-out/excercise/excerciseModule.js"></script>
 <script type="text/javascript" src="lay-out/multipleAnswers/multipleAnswersModule.js"></script>
+<script type="text/javascript" src="lay-out/standard/standardModule.js"></script>
 <script type="text/javascript" src="module/ajaxRequest.js"></script>
 <script type="text/javascript" src="module/helper.js"></script>
 <script type="text/javascript" src="lay-out/pieceAbstract.js"></script>
@@ -43,6 +46,7 @@
 <script type="text/javascript" src="lay-out/promotion.js"></script>
 <script type="text/javascript" src="lay-out/moves.js"></script>
 <script type="text/javascript" src="lay-out/move.js"></script>
+<script type="text/javascript" src="lay-out/form.js"></script>
 <script type="text/javascript" src="lay-out/info.js"></script>
 <script type="text/javascript" src="lay-out/variation.js"></script>
 <script type="text/javascript" src="lay-out/enlarge.js"></script>
@@ -62,17 +66,20 @@
 <script type="text/javascript" src="lay-out/puzzle/timer.js"></script>
 <script type="text/javascript" src="lay-out/puzzle/puzzleInfo.js"></script>
 <script type="text/javascript" src="lay-out/puzzle/puzzleActions.js"></script>
+<script type="text/javascript" src="lay-out/puzzle/guestForm.js"></script>
 <script type="text/javascript" src="lay-out/game/gameInfo.js"></script>
 <script type="text/javascript" src="lay-out/game/endGameInfo.js"></script>
 <script type="text/javascript" src="lay-out/selection/selectionInfo.js"></script>
 <script type="text/javascript" src="lay-out/multipleAnswers/multipleAnswersInfo.js"></script>
 <script type="text/javascript" src="lay-out/multipleAnswers/answer.js"></script>
 <script type="text/javascript" src="lay-out/excercise/excerciseInfo.js"></script>
+<script type="text/javascript" src="lay-out/standard/removedPieces.js"></script>
+<script type="text/javascript" src="lay-out/standard/evaluation.js"></script>
 <script type="text/javascript">
 <!--
 	chss_global_vars.local = true;
 	var appArgs = {centerToScreen: true, mobileFullscreen: true};
-    var args = {appName: "ExcerciseViewer", objectSerial: "1", attempt: 0, previousPage: ""};
+    var args = {appName: "StandardView"};
     var width = window.innerWidth;
     var height = window.innerHeight;
 	var board = new chssBoard(document.getElementById("board"), appArgs, args);
@@ -85,7 +92,7 @@
 	//console.log(Nag.getNagByCode("$40"));
 	
 	var wait_for_script = false;
-	if (!Worker || (location && location.protocol === "file:")) 
+	if (typeof Worker === 'undefined' || (location && location.protocol === "file:")) 
 	{
 		var script_tag  = document.createElement("script");
 		script_tag.type ="text/javascript";

@@ -7,10 +7,12 @@ chssModuleManager.subModes = {NOT_ACTIVE: "not_active",
 							  ADD_MARKING: "add_marking",
 							  DISABLE_CHANGE: "disable_change",
 							  CORRECTION_DISABLED: "correction_disabled",
-							  MINUS_ONE_CORRECTION: "minus_one_correction",}
+							  MINUS_ONE_CORRECTION: "minus_one_correction"}
 
 function chssModuleManager(args, board)
 {	
+	this._user = undefined;
+	
 	this._mode = chssModuleManager.modes.ADD_MOVES_MODE;
 	this._subMode = chssModuleManager.subModes.NOT_ACTIVE;
 	this._module = undefined;
@@ -18,7 +20,6 @@ function chssModuleManager(args, board)
 	this._play_game_timer = null;
 	this._timer_paused = false;
 	this._prev_mode = null;
-	this.initModule(args, board);
 	
 	this._puzzleNextMove = undefined;
 	this._validation = undefined;
@@ -32,6 +33,8 @@ function chssModuleManager(args, board)
 	
 	this._initiated = false;
 	this._imagesLoaded = false;
+	
+	this.initModule(args, board);
 }
 
 chssModuleManager.prototype.initModule = function(args, board)
@@ -43,6 +46,7 @@ chssModuleManager.prototype.initModule = function(args, board)
 		case "SelectionViewer": this._module = new chssSelectionModule(args, board, this); break;
 		case "ExcerciseViewer": this._module = new chssExcerciseModule(args, board, this); break;
 		case "MultipleAnswersViewer": this._module = new chssMultipleAnswersModule(args, board, this); break;
+		case "StandardView": this._module = new chssStandardModule(args, board, this); break;
 	}
 	this._module.initData(this.initiated, this);
 }
@@ -53,17 +57,19 @@ chssModuleManager.prototype.initiated = function()
 	this._mode = initialMode[0];
 	this._subMode = initialMode[1];
 	chssBoard.engine.setOnline(initialMode[2]);
-	if(typeof this._module !== 'undefined' && typeof this._module.getChangeAttempts === 'function')
+	if(typeof this._module !== 'undefined' && this._module != null && typeof this._module.getChangeAttempts === 'function')
 		this._changeAttempts = this._module.getChangeAttempts();
 	chssBoard.moduleManager.loadNewGame(this._module.getPGNFile());
-	this.draw();
-	this._moduleDrawn = true;
-	chssBoard.board.loadComplete();
+	if(this.draw() !== false)
+	{
+		this._moduleDrawn = true;
+		chssBoard.board.loadComplete();
+	}
 }
 
 chssModuleManager.prototype.draw = function()
 {
-	this._module.draw();
+	return this._module.draw();
 }
 
 chssModuleManager.prototype.setMode = function(mode)
@@ -104,6 +110,7 @@ chssModuleManager.prototype.redraw = function(forceRedraw)
 	chss_global_vars.prevCursor = undefined;
 	chssBoard.board.removeAvailableMoves();
 	chssBoard.board.clearDrag();
+	chssBoard.board.removePath(null);
 	chssBoard.board.redraw();
 	chssBoard.board.getMovesList().changeMovesText(forceRedraw);
 	chssBoard.board.getMovesList().changeSelectedIndex();
@@ -113,7 +120,9 @@ chssModuleManager.prototype.redraw = function(forceRedraw)
 		this._module.hide();
 	else if(this._moduleDrawn)
 		this._module.show();
-	
+
+	if(this._moduleDrawn && typeof this._module !== "undefined" && this._module != null && typeof this._module.redraw === 'function')
+		this._module.redraw();
 	//console.log(chssBoard.chssGame.newFenFromCurrentBoard(false, true, false, false));
 	//chssBoard.chssGame.getPGNFile().getMovesToString();
 	//chssBoard.chssGame.getPGNFile().getVariationsToString();
@@ -140,7 +149,8 @@ chssModuleManager.prototype.addMove = function(prevSelectedX, prevSelectedY, sel
 			this.addVariation.apply(this, args);
 		}
 	}
-	this.redraw(true);
+	else
+		this.redraw(true);
 }
 	
 chssModuleManager.prototype.addVariation = function(prevSelectedX, prevSelectedY, selectedX, selectedY, variation)
@@ -150,12 +160,15 @@ chssModuleManager.prototype.addVariation = function(prevSelectedX, prevSelectedY
 	{
 		chssBoard.board.getPromotionPopUp().draw(chssBoard.chssGame.active(true), chssModuleManager.prototype.addVariationPiece);
 	}
-	else if(legit)
+	else
 	{
-		chssBoard.engine.think();
+		this.resetChange();
+		this.redraw(true);
+		if(legit)
+		{
+			this.drawLastMove();
+		}
 	}
-	this.resetChange();
-	this.redraw(true);
 }
 
 chssModuleManager.prototype.resetChange = function()
@@ -164,7 +177,7 @@ chssModuleManager.prototype.resetChange = function()
 		this._changeAttempts--;
 	else if(chssBoard.chssGame.getCurrentMove() != this._changeHalfmove)
 	{
-		if(typeof this._module !== 'undefined' && typeof this._module.getChangeAttempts === 'function')
+		if(typeof this._module !== 'undefined' && this._module !== null && typeof this._module.getChangeAttempts === 'function')
 			this._changeAttempts = this._module.getChangeAttempts();
 		this._changeHalfmove = chssBoard.chssGame.getCurrentMove();
 	}
@@ -174,14 +187,19 @@ chssModuleManager.prototype.resetChange = function()
 
 chssModuleManager.prototype.addVariationPiece = function(color, piececode)
 {
-	 chssBoard.chssGame.addPromotionPiece(color, piececode);
+	chssBoard.chssGame.addPromotionPiece(color, piececode);
+	chssBoard.engine.think();
+	chssBoard.engine.evaluate();
+	chssBoard.moduleManager.resetChange();
+	chssBoard.moduleManager.redraw(true);
+	chssBoard.moduleManager.drawLastMove();
 }
 
 chssModuleManager.prototype.checkMove = function(x1, y1, x2, y2)
 {
 	if(chssBoard.chssGame.checkMove(x1, y1, x2, y2))
 	{
-		if(!chssBoard.engine.getOnline())
+		if(!(chssBoard.engine.getOnline() || chssBoard.engine.getEvalOnly()))
 		{
 			this._puzzleNextMove = chssBoard.chssGame.getNextMove(true);
 			this._validation = false;
@@ -268,20 +286,32 @@ chssModuleManager.prototype.checkMove = function(x1, y1, x2, y2)
 		{
 			if(chssBoard.chssGame.addMove(x1, y1, x2, y2, false))
 			{
-				chssBoard.moduleManager.setMode(chssModuleManager.modes.VIEW_MODE);
+				if(chssBoard.engine.isOnline())
+					chssBoard.moduleManager.setMode(chssModuleManager.modes.VIEW_MODE);
 				if(!chssBoard.chssGame.getPromotion())
 				{
 					if(chssBoard.chssGame.getResult() == chssGame.results.NONE)
 					{
+						chssBoard.engine.evaluate();
 						chssBoard.engine.think();
 					}
 					else
 					{
-						if(typeof this._module !== 'undefined' && typeof this._module.processResult === 'function')
+						if(typeof this._module !== 'undefined' && this._module != null && typeof this._module.processResult === 'function')
 							this._module.processResult();
 					}
+					this.resetChange();
 					chssBoard.moduleManager.redraw(true);
+					this.drawLastMove();
 				}
+				else
+				{
+					chssBoard.board.getPromotionPopUp().draw(chssBoard.chssGame.active(true), chssModuleManager.prototype.addVariationPiece);
+				}
+			}
+			else
+			{
+				this.redraw(false);
 			}
 		}
 	}
@@ -358,6 +388,12 @@ chssModuleManager.prototype.drawTempMove = function()
 	chssBoard.board.setPiece(null, chssBoard.board.getFlip()?7-chss_global_vars.prevSelectedX:chss_global_vars.prevSelectedX, chssBoard.board.getFlip()?7-chss_global_vars.prevSelectedY:chss_global_vars.prevSelectedY);
 }
 
+chssModuleManager.prototype.drawLastMove = function()
+{
+	var lastMove = chssBoard.chssGame.getMovesList()[chssBoard.chssGame.getCurrentMove()-1];
+	chssBoard.board.drawPath(lastMove.getMovePath());
+}
+
 chssModuleManager.prototype.actionChangeBoard = function(action, variationId)//default variationId false
 {
 	var proceed = true;
@@ -372,7 +408,7 @@ chssModuleManager.prototype.actionChangeBoard = function(action, variationId)//d
 
 chssModuleManager.prototype.changeBoard = function(action, variationId)//default variationId false
 {
-	if(typeof variationId != 'undefined' && variationId!==false)
+	if(typeof variationId !== 'undefined' && variationId!==false)
 	{
 		if(variationId!=0)
 		{
@@ -384,7 +420,7 @@ chssModuleManager.prototype.changeBoard = function(action, variationId)//default
 			chssBoard.chssGame.setVariationMove(0);
 		}
 	}
-	if(typeof action != 'undefined')
+	if(typeof action !== 'undefined')
 	{
 		chssBoard.chssGame.changeBoard(action, this._mode == chssModuleManager.modes.VIEW_MODE);
 		this.redraw(false);
@@ -404,7 +440,7 @@ chssModuleManager.prototype.checkGamePuzzle = function()
 {
 	return (((chssBoard.chssGame.getCurrentMove()==0 && chssBoard.chssGame.getMove(0) != null && chssBoard.chssGame.getMove(0).getNotation() != "...") ||
 			(chssBoard.chssGame.getCurrentMove()==1 && chssBoard.chssGame.getMove(0) != null && chssBoard.chssGame.getMove(0).getNotation() == "...")) && chssBoard.chssGame.getPGNFile().getLastMove() != null && chssBoard.chssGame.getPGNFile().getLastMove().isBreak()) ||
-			(chssBoard.chssGame.getCurrentMove()>0 && chssBoard.chssGame.getMove(chssBoard.chssGame.getCurrentMove()-1).isBreak() && this._mode == chssModuleManager.modes.VIEW_MODE);
+			(chssBoard.chssGame.getCurrentMove()>0 && chssBoard.chssGame.getMove().isBreak() && this._mode == chssModuleManager.modes.VIEW_MODE);
 }
 
 chssModuleManager.prototype.playGame = function(fromStart, variation) //default: fromStart = false, variation = false
@@ -479,6 +515,18 @@ chssModuleManager.prototype.removedMarking = function(x, y)
 		this._module.removeMarking(x, y)
 }
 
+chssModuleManager.prototype.removedMarking = function(x, y)
+{
+	if(typeof this._module !== 'undefined' && this._module != null && typeof this._module.removeMarking === 'function')
+		this._module.removeMarking(x, y)
+}
+
+chssModuleManager.prototype.evaluationDraw = function(draw)
+{
+	if(typeof this._module !== 'undefined' && this._module != null && typeof this._module.evaluationDraw === 'function')
+		this._module.evaluationDraw(draw)
+}
+
 chssModuleManager.prototype.getVariableForCommentArea = function(type)
 {
 	if((chssBoard.chssGame.getCurrentMove(true) == 0 || (chssBoard.chssGame.getCurrentMove(true) == 1 && chssBoard.chssGame.getPGNFile().getMoves().length > 0 && chssBoard.chssGame.getPGNFile().getMoves()[0].getNotation() == "...")) && chssBoard.chssGame.getVariationMove() == 0)
@@ -530,4 +578,39 @@ chssModuleManager.prototype.correctionAllowed = function()
 	}
 
 	return true;
+}
+
+chssModuleManager.prototype.getUser = function()
+{
+	return this._user;
+}
+
+chssModuleManager.prototype.setUser = function(user)
+{
+	this._user = user;
+}
+
+chssModuleManager.prototype.startNewGame = function(white, loadFromModule)
+{
+	if(typeof loadFromModule === "undefined")
+		loadFromModule = false;
+	
+	chssBoard.chssGame = new chssGame(loadFromModule?this._module.getPGNFile().getFen():new chssPGNFile());
+	chssBoard.chssGame.setEdit(true);
+	
+	if((white && chssBoard.board.getFlip()) ||
+	   (!white && !chssBoard.board.getFlip()))
+		chssBoard.board.rotate();
+
+	this.redraw(true);
+	
+	if(!loadFromModule)
+	{
+		if(!white)
+			chssBoard.engine.think();
+		else
+			chssBoard.engine.stop();
+	}
+	else
+		chssBoard.engine.stop();
 }

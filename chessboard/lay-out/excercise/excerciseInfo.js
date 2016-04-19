@@ -106,8 +106,8 @@ chssExcerciseInfo.prototype = {
 		{
 			var rect_width = Math.floor((this._progressWrapper.clientWidth - 1)/this._total);
 			
-			var enabled_fault_colour = "#F54A2C";
-			var enabled_correct_colour = chssOptions.select_color;
+			var enabled_fault_colour = "#F71F06";
+			var enabled_correct_colour = "#479203";
 			var disabled_colour = chssOptions.highlight_color;
 
 			this._progressWrapper.innerHTML = "";
@@ -122,7 +122,7 @@ chssExcerciseInfo.prototype = {
 				box.style.display = "inline-block" 
 				box.style.backgroundColor = col;
 				box.style.width = rect_width + "px";
-				box.style.height = 3 + "px";
+				box.style.height = 3 * (chssOptions.board_size/360) + "px";
 				this._progressWrapper.appendChild(box);
 			}
 		},

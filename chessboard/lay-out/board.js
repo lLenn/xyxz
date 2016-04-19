@@ -26,8 +26,10 @@ function boardElement(parentDiv, centerToScreen)
 	this._flip = false;
 	this._coloredFields = new Array();
 	this._selectedFields = new Array();
+	this._lastPath = new Array();
 	this._load = undefined;
 	this._prevPositionBoard = undefined;
+	this._enlarged = false;
 }
 
 boardElement.prototype.draw = function()
@@ -52,17 +54,17 @@ boardElement.prototype.draw = function()
 	
 	this._boardBackground.appendChild(this._board);
 	this._wrapper.appendChild(this._boardBackground);
-	
+
 	this.addMovesList();
+	this.addActions();
+	this.addChange();
 	this.addDragElement();
 	this.addEngine();
 	this.dragging();
 	this.addKeyBindings();
-	this.addActions();
 	this.addCommentArea();
 	this.addColorIndicator();
 	this.addPopUps();
-	this.addChange();
 	this.addStatusImage();
 
 	this._load = new chssLoadScreen();
@@ -74,13 +76,38 @@ boardElement.prototype.draw = function()
 	//document.body.appendChild(this._upload.getUploadElement());
 }
 
-boardElement.prototype.resize = function(width, height)
+boardElement.prototype.resize = function(width, height, beforeLoad, unsize)
 {
+	if(typeof beforeLoad === "undefined")
+		beforeLoad = false;
+	
+	if(typeof unsize === "undefined")
+		unsize = false;
+	
+	var wrapperVer = 0,
+		parentHeight = height;
+	
+	if(height>width)
+	{
+		height = this._wrapper.offsetHeight * width/this._wrapper.offsetWidth;
+		wrapperVer = (window.innerHeight - height)/2;
+	}
+	
+	//HACK ONLY FUNCTIONAL FOR RESIZE AFTER INITIATION AND FULLSCREEN ON/OFF
+	if((height/width)/(this._wrapper.offsetHeight/this._wrapper.offsetWidth) > 1.1 && !unsize)
+	{
+		this.resize(width, height * this._wrapper.offsetWidth/this._wrapper.offsetHeight, beforeLoad);
+		return;
+	}
+	
 	var old_board_size = chssOptions.board_size;
 	var verDiff = (this._wrapper.offsetHeight - old_board_size) * (height/this._wrapper.offsetHeight);
-	var board_size = Math.ceil(height - verDiff);
+	var board_size = Math.floor(height - verDiff);
 	chssOptions.board_size = Math.floor(board_size / 8) * 8;
 	var paddingVer = (height - (chssOptions.board_size + verDiff))/2;
+	if(wrapperVer === 0)
+		wrapperVer = paddingVer
+
 	var paddingHor = paddingVer;
 	var diffCoeff = chssOptions.board_size/old_board_size;
 	chssOptions.moves_size = width - (this._boardBackground.offsetWidth * (diffCoeff)) - paddingVer;
@@ -89,23 +116,24 @@ boardElement.prototype.resize = function(width, height)
 		paddingHor = (chssOptions.moves_size + paddingVer - (chssOptions.board_size*1.1))/2;
 		chssOptions.moves_size = chssOptions.board_size*1.1;
 	}
-	this._parentDiv.style.height = height + "px";
+	this._parentDiv.style.height = parentHeight + "px";
 	this._parentDiv.style.width = width + "px";
-	this._wrapper.style.marginTop = paddingVer + "px";
+	this._wrapper.style.marginTop = wrapperVer + "px";
+	this._wrapper.style.marginBottom = wrapperVer + "px";
 	this._wrapper.style.marginLeft = paddingHor + "px";
 	this._wrapper.style.marginRight = paddingHor + "px";
 	
 	chssOptions.font_size = chssOptions.font_size * diffCoeff;
 	this._wrapper.style.fontSize = chssOptions.font_size + "px";
 	
-	this.drawSize(diffCoeff);
+	if(!beforeLoad)
+		this.drawSize(diffCoeff);
+	else
+		this.drawWrapper(diffCoeff);
 }
 
-boardElement.prototype.drawSize = function(resize)
-{	
-	if(typeof resize == "undefined")
-		resize = false;
-	
+boardElement.prototype.drawWrapper = function(resize)
+{
 	var backgroundImage = chssOptions.images_url + "chessboard/Board" + (this.getFlip()?"_flip":"") + ".png";
 	var background = new Image();
 	background.src = backgroundImage;
@@ -115,31 +143,60 @@ boardElement.prototype.drawSize = function(resize)
 	
 	this._boardBackground.style.width = width + "px";
 	this._boardBackground.style.height = height + "px";
-	
+
 	this._moves.getMoves().style.width = chssOptions.moves_size + "px";
-	this._moves.getMoves().style.top = (height * 0.6) + "px";
 	this._moves.getMoves().style.left = width + "px";
-	this._moves.getMoves().style.height = (height * 0.4) + "px";
+	if(resize === false)
+	{
+		this._moves.getMoves().style.top = (height * 0.6) + "px";
+		this._moves.getMoves().style.height = (height * 0.4) + "px";
+	}
+	else
+	{
+		this._moves.getMoves().style.top = parseFloat(this._moves.getMoves().style.top) * resize + "px";
+		this._moves.getMoves().style.height = parseFloat(this._moves.getMoves().style.height) * resize + "px";
+	}
 
 	this._actions.getSubBoardElement().style.width = Math.floor(width * 10) / 10 + "px";
 	this._actions.getSubMovesElement().style.width = Math.floor(chssOptions.moves_size * 10) / 10 + "px";
 	this._actions.getActionsElement().style.width = width + chssOptions.moves_size + "px";
+	this._actions.drawSize(resize);
+}
+
+boardElement.prototype.drawSize = function(resize)
+{	
+	if(typeof resize == "undefined")
+		resize = false;
+	
+	this.drawWrapper(resize);
 	
 	if(resize === false)
 	{
+		this.centerToScreen();
+		
+		if(chssBoard.mobileManager.isMobile())
+			this.fullscreen(true);
 		this._load.show();
-		if(this._centerToScreen)
-			this.centerToScreen();
 	}
+
+	var backgroundImage = chssOptions.images_url + "chessboard/Board" + (this.getFlip()?"_flip":"") + ".png";
+	var background = new Image();
+	background.src = backgroundImage;
+	
+	var width = background.width * (chssOptions.board_size/360);
+	var height = background.height * (chssOptions.board_size/360);
 
 	var parentRect = getPageOffset(this._wrapper);
 	chss_global_vars.parentTop = parentRect.top;
 	chss_global_vars.parentLeft = parentRect.left;
 	
+	var boardTop = (height - chssOptions.board_size)/2,
+		boardLeft = (width - chssOptions.board_size)/2;
+	
 	this._board.style.width = chssOptions.board_size + "px";
 	this._board.style.height = chssOptions.board_size + "px";
-	this._board.style.top = (height - parseInt(this._board.style.height))/2 + "px";
-	this._board.style.left = (width - parseInt(this._board.style.width))/2 + "px";
+	this._board.style.top = boardTop + "px";
+	this._board.style.left = boardLeft + "px";
 	
 	for(var i=0;i<8;i++)
 	{
@@ -149,13 +206,14 @@ boardElement.prototype.drawSize = function(resize)
 	this._commentArea.getWrapper().style.width = chssOptions.moves_size + "px";
 	this._commentArea.getWrapper().style.left = width + "px";
 	if(resize === false)
-		this._commentArea.getWrapper().style.height = (height * 0.6) + "px";
+	{
+		this._commentArea.setHeight(chssCommentArea.SMALL, height * 0.6);
+		this._commentArea.draw();
+	}
 	else
 	{
-		this._commentArea.getWrapper().style.top = parseFloat(this._commentArea.getWrapper().style.top) * resize + "px";
-		this._commentArea.getWrapper().style.height = parseFloat(this._commentArea.getWrapper().style.height) * resize + "px";
+		this._commentArea.resize(resize);
 	}
-	this._commentArea.draw();
 	
 	this._change.getWrapper().style.width = Math.floor(chssOptions.moves_size * 10) / 10 + "px";
 	if(resize === false)
@@ -171,25 +229,23 @@ boardElement.prototype.drawSize = function(resize)
 	this._colorIndicator.getPiece().style.left = "0px";
 	
 	this._dragElement.drawSize();
-	this._actions.drawSize(resize);
 	this._promotionPopUp.drawSize();
 	this._variationPopUp.drawSize();
 	this._change.drawSize(resize);
 
 	var temp = document.createElement("div");
 	temp.className = "buttonWrapper";
-	document.body.appendChild(temp);
+	this._wrapper.appendChild(temp);
 
 	this._buttonWidth = chssOptions.moves_size - parseFloat(chssHelper.getComputedStyle(temp, "padding-left")) - parseFloat(chssHelper.getComputedStyle(temp, "padding-right"));
 	this._buttonHeight = 40 * (chssOptions.board_size/360);
 
-	document.body.removeChild(temp);
-	
+	this._wrapper.removeChild(temp);
 	chssBoard.moduleManager.redraw(true);
 	if(resize)
 	{
 		this._statusImage.getImageElement().style.width = chssOptions.moves_size + "px";
-		this._statusImage.getImageElement().style.top = parseFloat(this._boardBackground.style.top) + "px";
+		this._statusImage.getImageElement().style.top = parseFloat(this._statusImage.getImageElement().style.top) * resize + "px";
 		this._statusImage.getImageElement().style.left = parseFloat(this._boardBackground.style.width) + "px";
 		this._statusImage.resize(resize);
 		
@@ -199,43 +255,48 @@ boardElement.prototype.drawSize = function(resize)
 
 boardElement.prototype.centerToScreen = function()
 {	
-    var wWidth = window.innerWidth,
-    	wHeight = window.innerHeight,
-    	wWidthDiv = wWidth/2,
-    	wHeightDiv = wHeight/2,
-    	parentRect = getPageOffset(this._parentDiv),
-    	bHeight = this._wrapper.offsetHeight,
-    	bWidth = this._wrapper.offsetWidth,
-    	bHeightDiv = bHeight/2,
-    	bWidthDiv = bWidth/2,
-    	bodyHeight = document.body.clientHeight,
-    	bodyWidth = document.body.clientWidth,
-    	marginLeft = 50,
-    	marginRight = 50,
-    	marginTop = 25,
-    	marginBottom = 25;
-    
-    /*
-    if(wHeight > parentRect.top + bHeight + marginTop + marginBottom && bodyHeight <= wHeight && wHeightDiv - bHeightDiv - 50 > parentRect.top)
-    {
-    	marginTop = -(parentRect.top - wHeightDiv) - bHeightDiv - 50;
-    	marginBottom = wHeight - bodyHeight - marginTop;
-    }
-    */
-    
-    if(wWidth > parentRect.left + bWidth + marginLeft + marginRight && bodyWidth <= wWidth && wWidthDiv - bWidthDiv > parentRect.left)
-    {
-    	marginLeft = -(parentRect.left - wWidthDiv) - bWidthDiv;
-    }
-
-    this._parentDiv.style.padding = marginTop + "px " + marginRight + "px " + marginBottom + "px " + marginLeft + "px";
+	if(this._centerToScreen)
+	{
+	    var wWidth = window.innerWidth,
+	    	wHeight = window.innerHeight,
+	    	wWidthDiv = wWidth/2,
+	    	wHeightDiv = wHeight/2,
+	    	parentRect = getPageOffset(this._parentDiv),
+	    	bHeight = this._wrapper.offsetHeight,
+	    	bWidth = this._wrapper.offsetWidth,
+	    	bHeightDiv = bHeight/2,
+	    	bWidthDiv = bWidth/2,
+	    	bodyHeight = document.body.clientHeight,
+	    	bodyWidth = document.body.clientWidth,
+	    	marginLeft = 50,
+	    	marginRight = 50,
+	    	marginTop = 25,
+	    	marginBottom = 25;
+	    
+	    /*
+	    if(wHeight > parentRect.top + bHeight + marginTop + marginBottom && bodyHeight <= wHeight && wHeightDiv - bHeightDiv - 50 > parentRect.top)
+	    {
+	    	marginTop = -(parentRect.top - wHeightDiv) - bHeightDiv - 50;
+	    	marginBottom = wHeight - bodyHeight - marginTop;
+	    }
+	    */
+	    
+	    if(wWidth > parentRect.left + bWidth + marginLeft + marginRight && bodyWidth <= wWidth && wWidthDiv - bWidthDiv > parentRect.left)
+	    {
+	    	marginLeft = -(parentRect.left - wWidthDiv) - bWidthDiv;
+	    }
+	
+	    this._parentDiv.style.padding = marginTop + "px " + marginRight + "px " + marginBottom + "px " + marginLeft + "px";
+	}
 }
 
-boardElement.prototype.fullscreen = function()
+boardElement.prototype.fullscreen = function(beforeLoad)
 {
+	if(typeof beforeLoad === "undefined")
+		beforeLoad = false;
 	if(!this._enlarged)
 	{
-		this._prevPositionBoard = [this._centerToScreen, document.body.style.padding, document.body.style.overflow, this._parentDiv.style.position, this._parentDiv.style.top, this._parentDiv.style.right, this._parentDiv.style.bottom, this._parentDiv.style.left, this._parentDiv.style.padding, this._parentDiv.style.background, this._wrapper.offsetWidth, this._wrapper.offsetHeight];
+		this._prevPositionBoard = [this._centerToScreen, document.body.style.padding, document.body.style.overflow, this._parentDiv.style.position, this._parentDiv.style.top, this._parentDiv.style.right, this._parentDiv.style.bottom, this._parentDiv.style.left, this._parentDiv.style.padding, this._parentDiv.style.background, this._wrapper.offsetWidth, this._wrapper.offsetHeight, this._engine.getEngineElement().style.display];
 	
 		this._centerToScreen = false;
 		document.body.scrollTop = "0";
@@ -251,13 +312,16 @@ boardElement.prototype.fullscreen = function()
 		this._parentDiv.style.right = "0";
 		this._parentDiv.style.padding = "0";
 		this._parentDiv.style.background = chssOptions.background_color;
+		this._engine.getEngineElement().style.display = "none";
 	
-		board.resize(window.innerWidth, window.innerHeight);
-		this._load.hide();
+		this.resize(window.innerWidth, window.innerHeight, beforeLoad);
+		if(!beforeLoad)
+			this._load.hide();
 		this._enlarged = true;
 	}
 	else
 	{	
+		//console.log(this._prevPositionBoard);
 		this._centerToScreen = this._prevPositionBoard[0];
 		document.body.style.padding = this._prevPositionBoard[1];
 		document.body.style.overflow = this._prevPositionBoard[2];
@@ -268,12 +332,14 @@ boardElement.prototype.fullscreen = function()
 		this._parentDiv.style.left = this._prevPositionBoard[7];
 		this._parentDiv.style.padding = this._prevPositionBoard[8];
 		this._parentDiv.style.background = this._prevPositionBoard[9];
+		this._engine.getEngineElement().style.display = this._prevPositionBoard[12];
 	
-		board.resize(this._prevPositionBoard[10], this._prevPositionBoard[11]);
+		this.resize(this._prevPositionBoard[10], this._prevPositionBoard[11], false, true);
 		this._enlarged = false;
 		document.body.scrollTop = getPageOffset(this._parentDiv).top;
 		document.documentElement.scrollTop = getPageOffset(this._parentDiv).top;
 	}
+	this._actions.getEnlargeButton().setEnlarge(this._enlarged);
 }
 
 boardElement.prototype.addKeyBindings = function()
@@ -294,7 +360,9 @@ boardElement.prototype.addKeyBindings = function()
 		{
 			chssBoard.moduleManager.actionChangeBoard("-1", false);
 		}
-		event.preventDefault();
+		
+		if(key == 39 || key == 37)
+			event.preventDefault();
 	}
 }
 
@@ -343,13 +411,22 @@ boardElement.prototype.redraw = function()
 	}
 }
 
+boardElement.prototype.redrawMoves = function(top, height)
+{
+	this._moves.getMoves().style.top = top + "px";
+	this._moves.getMoves().style.height = height - top + "px";
+	top += this._moves.getMoves().offsetHeight;
+	
+	this._change.getWrapper().style.top = top + "px";
+}
+
 boardElement.prototype.drawAvailableMoves = function(x, y, available)
 {
 	x = this._flip?7-x:x;
 	y = this._flip?7-y:y;
 	if(chssOptions.show_selected_piece)
 	{
-		this._rows[y].getPiece(x).selectedPiece(true);
+		this._rows[y].getPiece(x).selectedPiece(true, '#479203');
 		this._selectedFields.push([x, y]);
 	}
 	
@@ -359,7 +436,7 @@ boardElement.prototype.drawAvailableMoves = function(x, y, available)
 		{
 			x = this._flip?7-available[i][0]:available[i][0];
 			y = this._flip?7-available[i][1]:available[i][1];
-			this._rows[y].getPiece(x).availableMove(true);
+			this._rows[y].getPiece(x).availableMove(true, '#479203');
 			this._coloredFields.push([x, y]);
 		}	
 	}
@@ -408,8 +485,9 @@ boardElement.prototype.dragging = function()
 		if(chss_global_vars.dragging)
 		{
 			var dragElement = object.getDragElement().getWrapper();
-			dragElement.style.top = event.pageY - chss_global_vars.parentTop - (22.5 * (chssOptions.board_size/360)) + (document.documentElement.scrollTop - chss_global_vars.prevScrollTop) + "px";
-			dragElement.style.left = event.pageX - chss_global_vars.parentLeft - (22.5 * (chssOptions.board_size/360)) + (document.documentElement.scrollLeft - chss_global_vars.prevScrollLeft) + "px";
+			
+			dragElement.style.top = event.pageY - chss_global_vars.parentTop - (22.5 * (chssOptions.board_size/360)) + "px";
+			dragElement.style.left = event.pageX - chss_global_vars.parentLeft - (22.5 * (chssOptions.board_size/360)) + "px";
 		}
 	};
 }
@@ -508,15 +586,64 @@ boardElement.prototype.playNextMove = function(firstMove, variation) //default: 
 					chssBoard.moduleManager.changeBoard("Start", false);
 				else
 					chssBoard.moduleManager.changeBoard("+1", false);
-				
-				if(chssBoard.moduleManager.getMode() == chssModuleManager.modes.PLAY_PUZZLE_MODE && chssBoard.moduleManager.checkEndGame())
+
+				if(prevMode == chssModuleManager.modes.PLAY_PUZZLE_MODE && chssBoard.moduleManager.checkEndGame())
+				{
+					chssBoard.moduleManager.setMode(prevMode);
 					chssBoard.moduleManager.getModule().processValidation();
+				}
 
 				dragElement.getWrapper().style.display = "none";
 				chssBoard.moduleManager.setMode(prevMode);
 			});
 		}
 	}
+}
+
+boardElement.prototype.drawPath = function(path)
+{	
+	this.drawPathCoord(path);
+}
+
+boardElement.prototype.drawPathCoord = function(path, draw)
+{
+	if(typeof draw === 'undefined')
+		draw = true;
+
+	for(var i=0, len=path.length;i<len;i++)
+	{
+		var coor = path[i],
+			x = (this._flip && draw)?7-coor[0]:coor[0],
+			y = (this._flip && draw)?7-coor[1]:coor[1];
+
+		if(i==len-1)
+			this._rows[y].getPiece(x).selectedPiece(draw, "#7AA228");
+		else
+			this._rows[y].getPiece(x).availableMove(draw, "#7AA228");
+		
+		if(draw)
+			this._lastPath.push([x, y]);
+	}
+}
+
+boardElement.prototype.flipPath = function()
+{
+	var newPath = new Array();
+	for(var i=0, len=this._lastPath.length;i<len;i++)
+	{
+		var coor = this._lastPath[i],
+			x = (this._flip)?coor[0]:7-coor[0],
+			y = (this._flip)?coor[1]:7-coor[1];
+		newPath.push([x, y]);
+	}
+	this.removePath()
+	this.drawPath(newPath);
+}
+
+boardElement.prototype.removePath = function()
+{	
+	this.drawPathCoord(this._lastPath, false);
+	this._lastPath = new Array();
 }
 
 boardElement.prototype.addEngine = function()
@@ -556,10 +683,15 @@ boardElement.prototype.clearDrag = function()
 	
 	chss_global_vars.dragging = false;
 	chss_global_vars.localClick = false;
+	chss_global_vars.cancelDrag = false;
 	chss_global_vars.prevSelectedX = undefined;
 	chss_global_vars.prevSelectedY = undefined;
 	chss_global_vars.selectedX = undefined;
 	chss_global_vars.selectedY = undefined;
+	chss_global_vars.prevScrollTop = undefined;
+	chss_global_vars.prevScrollLeft = undefined;
+	chss_global_vars.prevDragElement = undefined;
+	chss_global_vars.prevDragChssPiece = undefined;
 	
 	dragElement.getWrapper().style.display = "none";
 	dragElement.getWrapper().style.cursor = "auto";
@@ -621,6 +753,7 @@ boardElement.prototype.rotate = function()
 	chss_global_vars.selectedX = 7-chss_global_vars.selectedX;
 	chss_global_vars.selectedY = 7-chss_global_vars.selectedY;
 	this.flipAvailableMoves();
+	this.flipPath();
 	this.redraw();
 }
 
@@ -700,7 +833,17 @@ boardElement.prototype.append = function(element)
 	this._wrapper.insertBefore(element, this._load.getWrapper());
 }
 
+boardElement.prototype.appendBefore = function(element, before)
+{
+	this._wrapper.insertBefore(element, before);
+}
+
 boardElement.prototype.loadComplete = function()
 {
 	this._load.hide();
+}
+
+boardElement.prototype.isEnlarged = function()
+{
+	return this._enlarged;
 }

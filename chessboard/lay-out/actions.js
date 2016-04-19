@@ -56,3 +56,8 @@ actionsElement.prototype.getChangeMovesElement = function()
 {
 	return this._changeMovesElement;
 }
+
+actionsElement.prototype.getEnlargeButton = function()
+{
+	return this._enlarge;
+}
