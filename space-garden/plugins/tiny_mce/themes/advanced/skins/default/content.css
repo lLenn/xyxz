@@ -1,0 +1,61 @@
+*
+{
+	margin: 0;
+	padding: 0;
+}
+
+body
+{
+	background-image: url("../layout/images/background.jpg");
+	background-repeat: no-repeat;
+	font-family: arial, verdana, helvetica, sans-serif;
+	font-size: 12px;
+	color: #112211;
+}
+
+a
+{
+    text-decoration: none;
+    color: #005830;
+    font-weight: bold;
+}
+
+p
+{
+	margin: 7px;
+}
+
+hr
+{
+	color: #989c8e;
+	background-color: #989c8e;
+	border: 1px solid #989c8e;
+}
+
+ul
+{
+	padding-left: 2.5em;
+}
+
+img
+{
+	border: 0;
+}
+
+table
+{
+	width: 100%;
+}
+
+td
+{
+	border: 1px solid #989c8e;
+	padding: 4px 12px 4px 12px;
+}
+
+th
+{
+	height: 22px;
+	background: #006649;
+	padding: 4px 12px 4px 12px;
+}

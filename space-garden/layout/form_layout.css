@@ -1,0 +1,111 @@
+@CHARSET "ISO-8859-1";
+
+/* FORM */
+.form_button
+{
+	border: 1px solid #989c8e;
+	padding: 4px;
+	/*background-color: #f6f0ad;*/
+	width: 150px;
+}
+
+input, select, textarea
+{
+	border: 1px solid #989c8e;
+	font-family: arial, verdana, helvetica, sans-serif;
+	font-size: 12px;
+}
+
+input
+{
+	padding: 1px;
+}
+
+.checkbox
+{
+	margin-top: 5px;
+	border: 0;
+}
+
+a.link_button:link, a.link_button:visited
+{
+	border: 1px solid #989c8e;
+	text-align: center;
+	padding: 6px;
+	display: block;
+	/*background-color: #f6f0ad;*/
+	text-decoration: none;
+	color: #005830;
+	width: 150px;
+	font-weight: bold;
+}
+
+a.mini
+{
+	padding: 2px !important;
+	width: 100px !important;
+}
+
+a.link_button:hover
+{
+	background-color: #9abfb0;
+}
+
+.record
+{
+	overflow: hidden;
+}
+
+.record_name, .record_name_required, .record_name_question
+{
+	padding-top: 1px;
+	margin: 3px 0 3px 15px;
+	float: left;
+	width: 160px;
+}
+
+.record_output
+{
+	word-wrap: break-word;
+	padding-top: 2px;
+	margin: 3px 0;
+	float: left;
+	max-width: 600px;
+}
+
+.record_name_required
+{
+	font-weight: bold;
+}
+
+.record_name_question
+{
+	width: 300px;
+}
+
+.record_button
+{
+	float: left;
+	margin: 3px;
+	padding: 5px 0;
+}
+
+.record_button_aligned
+{
+	float: left;
+	margin: 3px 3px 3px 15px;
+	padding: 5px 0;
+}
+
+.record_text_area
+{
+	width: 95%;
+	float: left;
+	margin-left: 15px;
+	padding: 5px 0;
+}
+
+.record_input
+{
+	float: left;
+}
