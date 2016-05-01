@@ -1,6 +1,6 @@
 <?php
 	$server = 'localhost';
-	$user = 'spacegarden';
-	$password = 'uy?4A(&';
+	$user = '******';
+	$password = '******';
 	$database = 'space-garden';
 ?>
