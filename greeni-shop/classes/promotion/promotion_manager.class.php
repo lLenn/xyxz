@@ -54,7 +54,7 @@ class PromotionManager
 			{
 				// If the amount of the promotion is smaller than or equal to the amount of the order then create new orders from the promotion
 				// untill the quantity of the order is smaller than the promotion's criteria allows
-				// If the condition of the criteria of the order is < or <= then stop the promotionloop
+				// (deprecated comment) If the condition of the criteria of the order is < or <= then stop the promotionloop
 				while($amount <= $order->get_quantity())
 				{
 					$temp_new_orders = array_merge($temp_new_orders, self::create_new_orders_from_promotion($order, $promotion));
@@ -65,7 +65,7 @@ class PromotionManager
 			else
 			{
 				// If the amount of the promotion is bigger than the amount of the order check if the promotion has the < or <= cond
-				// and if there isn't a promotion with a smaller amount in the criteria that is also legit
+				// and if there isn't a promotion with a smaller amount in the criteria that is also legitimate
 				// Otherwise skip the promotion.
 				if(Criteria::get_condition_compare_value($cond)<Criteria::get_condition_compare_value("="))
 				{
