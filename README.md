@@ -43,6 +43,6 @@ The code start on line 13 with `create_invoice($user, $order_id)` when a request
 Some examples:
 `criteria promotions = ["=50", "=25", "=10"]`
 
-Empty | Example 1 | Example 2 | Example 3 | Example 4
------ | --------- | --------- | --------- | ---------
+  | Example 1 | Example 2 | Example 3 | Example 4
+- | --------- | --------- | --------- | ---------
 # order | 100 | 75 | 35 | 12
