@@ -41,8 +41,29 @@ The code start on line 13 with `create_invoice($user, $order_id)` when a request
 2. The quantity of the promotion is smaller than or equal to the quantity specified in the order. This will only be checked if the conditions in the first scenario are not met. This is why the promotions are ordered by descending quantity. If a promotion in this scenario is eligible the quantity of the promotion will be deducted from the quantity of the order via the function `self::create_new_orders_from_promotion`. (line 60) The promotion is applied mutliple times until the quantity of the order is no longer bigger than the quantity of the promotion. (line 58) This scenario will loop through the remaining promotions until the quantity of the order is lower or equal to 0 and no more articles are able to be considered for a promotion (line 48), when the conditions of the first scenario are met and the process is reset, or when the criteria of the promotion does not start with "=". (line 62)
 
 Some examples:
-`criteria promotions = ["=50", "=25", "=10"]`
 
-  | Example 1 | Example 2 | Example 3 | Example 4
-- | --------- | --------- | --------- | ---------
+criteria promotions = ["=50", "=25", "=10", "=7"]
+Empty | Example 1 | Example 2 | Example 3 | Example 4
+----- | --------- | --------- | --------- | ---------
 # order | 100 | 75 | 35 | 12
+1st cycle | "=50" x 2 (l58) | "=50" | skipped | skipped
+# order | 0 | 25 | 35 | 12
+2nd cycle | break (l48) | "=25" | "=25" | skipped
+# order | 0 | 0 | 15 | 12
+3rd cycle | break (l48) | break (l48) | "=10" | "=10"
+# order | 0 | 0 | 5 | 2
+4th cycle | break (l48) | break (l48) | skipped | skipped
+# order | 0 | 0 | 5 | 2
+
+criteria promotions = ["<=150", "<=120", "=50", "=25", "=10", "=7"]
+Empty | Example 1 | Example 2 | Example 3 | Example 4
+----- | --------- | --------- | --------- | ---------
+# order | 100 | 75 | 35 | 12
+1st cycle | "=50" x 2 (l58) | "=50" | skipped | skipped
+# order | 0 | 25 | 35 | 12
+2nd cycle | break (l48) | "=25" | "=25" | skipped
+# order | 0 | 0 | 15 | 12
+3rd cycle | break (l48) | break (l48) | "=10" | "=10"
+# order | 0 | 0 | 5 | 2
+4th cycle | break (l48) | break (l48) | skipped | skipped
+# order | 0 | 0 | 5 | 2
