@@ -62,7 +62,7 @@ All possible new orders from this loop are added to a temporary array `$temp_new
 
 `create_new_orders_from_promotion(&$order, $promotion)` on line 137 creates an array of new orders seperated by the promotions that are applicable to the original order and return this array. The parameter `$order` is passed by reference. Depending on the condition of the criteria the quantity is deducted by that of the promotion or set to 0. (line 149 and 151) After which new orders are created based on the promotion types of the promotion. (line 154 to 175) 
 
- #### greeni-shop/classes/criteria.class.php
+#### greeni-shop/classes/criteria.class.php
  
 `get_condition_compare_value($condition)` on line 241 returns a number based on the condition of the criteria that can be used in conditions.
 
