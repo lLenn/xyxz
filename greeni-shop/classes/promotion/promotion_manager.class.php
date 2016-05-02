@@ -234,9 +234,6 @@ class PromotionManager
 	
 	static function is_criteria_valid_for_article($promotion, $update_id = "")
 	{
-		$cond = Criteria::get_condition_from_criteria($promotion->get_criteria());
-		$amount = Criteria::get_amount_from_criteria($promotion->get_criteria());
-		
 		$country_cond = PromotionDataManager::get_where_condition_for_countries($promotion->get_countries(), true, "c");	
 		
 		$update_cond = $country_cond;

@@ -271,7 +271,6 @@ class PromotionDataManager
 		$country_cond = "";
 		if($size)
 		{
-			
 			$country_cond = ($add_and?" AND ":" ") . ($table_name!=""?$table_name.".":"") . "country IN (";
 			$i = 1;
 			foreach($countries as $country)
