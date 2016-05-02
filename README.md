@@ -11,7 +11,7 @@ The first code I'm providing here is the logical model behind a promotion module
 
 **The first goal of this code is compare a newly added promotion with other promotions and give an approriate error message.**
 
-### greeni-shop/classes/promotion/promotion\_data\_manager.class.php
+##### greeni-shop/classes/promotion/promotion\_data\_manager.class.php
 
 The code starts on line 9 with the `retrieve_promotion_from_post()` function which is called to validate the request sent.  <return>
 After the input syntax is validated (from line 16 to 112) there are 2 functions that seek conflicts with the new given promotion criteria.  <return>
@@ -20,7 +20,7 @@ After the input syntax is validated (from line 16 to 112) there are 2 functions 
 
 `PromotionManager::are_promotion_types_valid_for_article($promotion, $update_id)` on line 134 calculates if the promotion is more profitable than other existing promotions, i.e. if the customer can choose one promotion over the other because the reduction is bigger if he buys less quantities on seperate occasions. This function returns the promotion that was extracted from the request, whether the promotion is conform to the syntax and is therefor legitimate, and if not which message is to be displayed together with possible other articles that conflict with the given criteria and what type of conflict was handled.
 
-### greeni-shop/classes/promotion/promotion\_manager.class.php
+##### greeni-shop/classes/promotion/promotion\_manager.class.php
 
 `is_criteria_valid_for_article($promotion, $update_id = "")` on line 235 first composes a condition that is then compared existing promotions in the database. The condition adresses whether dates for the promotion of an article and a certain criteria overlap. If this is the case the conficting promotions are returned.
 
