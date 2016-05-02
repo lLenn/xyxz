@@ -42,30 +42,14 @@ The code start on line 13 with `create_invoice($user, $order_id)` when a request
 
 Some examples:
 
-criteria promotions = ["=50", "=25", "=10", "=7"]
-
-Empty | Example 1 | Example 2 | Example 3 | Example 4
------ | --------- | --------- | --------- | ---------
-# order | 100 | 75 | 35 | 12
-1st cycle | "=50" x 2 (l58) | "=50" | skipped | skipped
-# order | 0 | 25 | 35 | 12
-2nd cycle | break (l48) | "=25" | "=25" | skipped
-# order | 0 | 0 | 15 | 12
-3rd cycle | break (l48) | break (l48) | "=10" | "=10"
-# order | 0 | 0 | 5 | 2
-4th cycle | break (l48) | break (l48) | skipped | skipped
-# order | 0 | 0 | 5 | 2
-
-criteria promotions = ["<=150", "<=120", "=50", "=25", "=10", "=7"]
-
-Empty | Example 1 | Example 2 | Example 3 | Example 4
------ | --------- | --------- | --------- | ---------
-# order | 100 | 75 | 35 | 12
-1st cycle | "=50" x 2 (l58) | "=50" | skipped | skipped
-# order | 0 | 25 | 35 | 12
-2nd cycle | break (l48) | "=25" | "=25" | skipped
-# order | 0 | 0 | 15 | 12
-3rd cycle | break (l48) | break (l48) | "=10" | "=10"
-# order | 0 | 0 | 5 | 2
-4th cycle | break (l48) | break (l48) | skipped | skipped
-# order | 0 | 0 | 5 | 2
+Criteria | ["=50", "=25", "=10", "=7"] | ["=50", "=25", "=10", "=7"] | ["=50", "=25", "=10", "=7"] | ["=50", "=25", "=10", "=7"] | ["=50", ">=25", "=10", "=7"] | ["<=150"] | ["<=150", "<=100"] | ["<50", "=25", "=7"]
+- | - | - | - | - | - | - | - | -
+# order | 100 | 75 | 35 | 12 | 75 | 100 | 100 | 74
+1st cycle | "=50" x 2 (l58) | "=50" | "=50" skipped | "=50" skipped | "=50" | "<=150" & break (l95) | "<=150" skipped | "<50" skipped
+# order | 0 | 25 | 35 | 12 | 25 | 0 | 100 | 74
+2nd cycle | break (l48) | "=25" | "=25" | "=25" skipped | ">=25" & break (l62) | break (l95) | "<=100" & break (l95) | "=25" x 2
+# order | 0 | 0 | 15 | 12 | 0 | 0 | 0 | 14
+3rd cycle | break (l48) | break (l48) | "=10" | "=10" | break (l62) | break (l95) | break (l95) | "=7" x 2
+# order | 0 | 0 | 5 | 2 | 0 | 0 | 0 | 0
+4th cycle | break (l48) | break (l48) | "=7" skipped | "=7" skipped | break (l62) | break (l95) | break (l95) | break (l48)
+# order | 0 | 0 | 5 | 2 | 0 | 0 | 0 | 0
