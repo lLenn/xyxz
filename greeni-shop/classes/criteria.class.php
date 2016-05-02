@@ -74,7 +74,7 @@ class Criteria
 			    	{
 			    		return 1;
 			    	}
-				}
+				}	
 			}
 		}
 		
