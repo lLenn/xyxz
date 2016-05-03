@@ -1,3 +1,5 @@
+**_This text is still under revision_**
+
 ## Greeni-shop
 
 This code was written during my employment at Garden Machinery during 2010 - 2011.
@@ -69,10 +71,10 @@ This module was written to embed some sites from suppliers into the greeni-shop 
 
 #### get_url.php
 
-Each supplier has its own page that embeds an iframe with a specific id that requests this page, e.g. car_parts.php, and sends allong 2 parameters: root & page. The root parameter is used to specify which template is to be used, if there need to be a login to access the suppliers site and others. The page parameter specifies which page from the supplier is to be loaded first.
+Each supplier has its own page that embeds an iframe with a specific id that requests this page, e.g. car_parts.php, and sends along 2 parameters: root & page. The root parameter is used to specify which template is to be used, if there need to be a login to access the suppliers site and others. The page parameter specifies which page from the supplier is to be loaded first.
 
 After the usual check are done to ensure a good database connection, whether the page can be viewed, etc. (line 2 to 21), a new Curl object is initiated with the root parameter. (line 23) If the page parameter is given, this is also set in the Curl object. (line 24 to 27) Some suppliers only provide access to their webshop after you have logged in. This is done with the `login` function. (line 32 and 37) The id of the iframe that the pages of the suppliers use is set (line 39) so javascript and others can use it where needed and a request is loaded in the right frame. After everything is set, the curl object loads the page and displays it. (line 42)
 
 #### classes/supplier/embedded/curl.class.php
 
-`Curl($root)` on line 50 initiates a new Curl object.  
+`Curl($root)` on line 50 initiates a new Curl object. 
