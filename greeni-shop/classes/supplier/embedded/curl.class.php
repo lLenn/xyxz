@@ -195,6 +195,13 @@ class Curl
 	public function add_proxy()
 	{
 		/*
+		if($GLOBALS["webserver"] == "wamp")
+		{
+		    curl_setopt($this->curl_handler, CURLOPT_PROXYAUTH, CURLAUTH_NTLM);
+			curl_setopt($this->curl_handler, CURLOPT_PROXY, "192.168.111.2");
+			curl_setopt($this->curl_handler, CURLOPT_PROXYPORT, 8080);
+			curl_setopt($this->curl_handler, CURLOPT_PROXYUSERPWD,"**");
+		}
 		*/
 	}
 	
@@ -316,7 +323,6 @@ class Curl
 		{
 			$data = "<p>" . $this->error_message . "</p>";
 		}
-		//dump($this->page);
 		return $data;
 	}
 	

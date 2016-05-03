@@ -77,4 +77,7 @@ After the usual check are done to ensure a good database connection, whether the
 
 #### classes/supplier/embedded/curl.class.php
 
-`Curl($root)` on line 50 initiates a new Curl object. 
+`Curl($root)` on line 50 initiates a new Curl object. Set the currency and template to be used, and initiates the curl handler.
+
+`login($data, $login_page)` on line 201
+
