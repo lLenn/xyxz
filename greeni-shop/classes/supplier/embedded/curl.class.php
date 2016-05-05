@@ -570,7 +570,7 @@ class Curl
 		}
 	}
 	
-	private static function read_header($ch, $header) 
+	private static function read_header($ch, $header)
 	{ 
 		$location = self::extract_header('Location:', '\n', $header);
 		if ($location)

@@ -79,5 +79,5 @@ After the usual check are done to ensure a good database connection, whether the
 
 `Curl($root)` on line 50 initiates a new Curl object. Set the currency and template to be used, and initiates the curl handler.
 
-`login($data, $login_page)` on line 201
+`login($data, $login_page)` on line 201 creates a session with the server depending on a post request or whether a certain javascript function needs to be called first; on a certain site a button needed to be pressed to access their catalogue and only then a session was created, direct access was impossible. Basically this function mimics user interactions to access the site. 
 
