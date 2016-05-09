@@ -20,5 +20,5 @@ Unfortunatly, due to the complexity of schaakschool and other priorities, this w
 ## Search
 
 This code was written as an excercise in symfony 2 for a sollicitation in 2016.
-This code was written in 3 days of 12 hours and this includes learning how symfony and doctrine works.
+This code was written in 3 days of 10 hours and this includes learning how symfony and doctrine works.
 This shows my current work ethics and ability to quickly learn a new framework or api.
